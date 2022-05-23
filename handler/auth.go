@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"test/models"
 
 	"github.com/gin-gonic/gin"
 )

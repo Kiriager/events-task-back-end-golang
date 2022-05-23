@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/golang-jwt/jwt/v4"
@@ -95,21 +94,6 @@ func Create(request *CreateUser) (*User, error) {
 
 	GetDB().Create(user)
 
-	defaultStartTime, err := time.Parse("15:04:05", "09:00:00")
-	if err != nil {
-		return nil, err
-	}
-
-	userSettings := &UserSettings{
-		About:     "",
-		FontSize:  "רגיל",
-		StartTime: defaultStartTime}
-
-	err = db.Model(user).Association("UserSettings").Append(userSettings)
-	if err != nil {
-		return nil, err
-	}
-
 	if user.ID <= 0 {
 		return nil, errors.New("failed to create user, connection error")
 	}
@@ -134,21 +118,6 @@ func Login(request *LoginRequest) (*User, error) {
 		}
 		return nil, err
 	}
-
-	statusBlocked := &UserStatus{}
-	err = db.Debug().Where("status = ?", "חסום").First(statusBlocked).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, errors.New("user status undefined")
-		}
-	}
-
-	if *user.StatusId == statusBlocked.ID {
-		return nil, errors.New("your profile was blocked")
-	}
-
-	user.LastLogin = gorm.DeletedAt{Time: time.Now(), Valid: true}
-	db.Updates(user)
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!

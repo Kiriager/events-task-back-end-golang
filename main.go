@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"test/handler"
+	"test/server"
 )
 
 func main() {

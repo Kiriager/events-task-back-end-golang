@@ -37,5 +37,10 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			main.GET("/me", h.MyAcc)
 			main.GET("/logout", h.Logout)
 		}
+
+		event := api.Group("/event")
+		{
+			event.POST("/add", h.AddEvent)
+		}
 	}
 }
