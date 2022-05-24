@@ -47,10 +47,7 @@ func (eventToCheck *Event) Validate() (bool, string) {
 	if isOk {
 		errs = "Requirement passed"
 		fmt.Println("Event is valid")
-<<<<<<< HEAD
 		fmt.Println("Hello")
-=======
->>>>>>> 9ee379b9b7b4d7d0a3f79b3e8ae4ee858d0bb8a2
 	}
 
 	return isOk, "Requirement passed"
