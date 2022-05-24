@@ -44,5 +44,5 @@ type CreateEvent struct {
 
 type Event struct {
 	gorm.Model
-	Title string `json:"email"`
+	Title string `json:"title"`
 }
