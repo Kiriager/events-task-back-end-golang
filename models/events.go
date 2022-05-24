@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 )
 
 func AddEvent(request *CreateEvent) (*Event, error) {
@@ -45,6 +46,7 @@ func (eventToCheck *Event) Validate() (bool, string) {
 
 	if isOk {
 		errs = "Requirement passed"
+		fmt.Println("Event is valid")
 	}
 
 	return isOk, "Requirement passed"
