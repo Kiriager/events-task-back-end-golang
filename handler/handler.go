@@ -42,5 +42,10 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 		{
 			event.POST("/add", h.AddEvent)
 		}
+		test := api.Group("/test")
+		{
+			test.GET("/my-test", h.test)
+		}
+
 	}
 }
