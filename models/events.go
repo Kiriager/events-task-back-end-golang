@@ -6,7 +6,15 @@ import (
 
 func AddEvent(request *CreateEvent) (*Event, error) {
 
-	event := &Event{Title: request.Title}
+	event := &Event{
+		Title:       request.Title,
+		Description: request.Description,
+		Start:       request.Start,
+		End:         request.End,
+		Location:    request.Location,
+		Latitude:    request.Latitude,
+		Longitude:   request.Longitude,
+	}
 	ok, resp := event.Validate()
 
 	if !ok {
@@ -22,11 +30,22 @@ func AddEvent(request *CreateEvent) (*Event, error) {
 	return event, nil
 }
 
-func (account *Event) Validate() (bool, string) {
-
-	if len(account.Title) < 6 {
-		return false, "Password is required"
+func (eventToCheck *Event) Validate() (bool, string) {
+	errs := ""
+	var isOk bool = true
+	if eventToCheck.Title == "" {
+		isOk = false
+		errs += "The title is required! "
 	}
 
-	return true, "Requirement passed"
+	if len(eventToCheck.Title) < 2 || len(eventToCheck.Title) > 40 {
+		isOk = false
+		errs += "The title field must be between 2-40 chars! "
+	}
+
+	if isOk {
+		errs = "Requirement passed"
+	}
+
+	return isOk, "Requirement passed"
 }

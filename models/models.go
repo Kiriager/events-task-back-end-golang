@@ -39,15 +39,22 @@ type LoginRequest struct {
 }
 
 type CreateEvent struct {
-	Title string `json:"title" binding:"required"`
+	Title       string `json:"title" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Start       string `json:"start" binding:"required"`
+	End         string `json:"end" binding:"required"`
+	Location    string `json:"location" binding:"required"`
+	Latitude    string `json:"latitude" binding:"required"`
+	Longitude   string `json:"longitude" binding:"required"`
 }
 
 type Event struct {
 	gorm.Model
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	Start       int     `json:"start"`
-	End         int     `json:"end"`
-	Latitude    float32 `json:"latitude"`
-	Longitude   float32 `json:"longitude"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Start       string `json:"start"`
+	End         string `json:"end"`
+	Location    string `json:"location"`
+	Latitude    string `json:"latitude"`
+	Longitude   string `json:"longitude"`
 }
