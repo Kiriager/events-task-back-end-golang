@@ -44,5 +44,10 @@ type CreateEvent struct {
 
 type Event struct {
 	gorm.Model
-	Title string `json:"title"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Start       int     `json:"start"`
+	End         int     `json:"end"`
+	Latitude    float32 `json:"latitude"`
+	Longitude   float32 `json:"longitude"`
 }
