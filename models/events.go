@@ -21,12 +21,11 @@ func AddEvent(request *CreateEvent) (*Event, error) {
 	if !ok {
 		return nil, errors.New(resp)
 	}
-
+	GetDB().Create(event)
 	if event.ID <= 0 {
 		return nil, errors.New("failed to create event connection error")
 	}
 
-	GetDB().Create(event)
 	return event, nil
 }
 
@@ -69,7 +68,14 @@ func (eventToUpdate *Event) UpdateEventFields(updateFields *UpdateEvent) {
 			return nil, errors.New(resp)
 		}*/
 }
+
 func (eventToUpdate *Event) UpdateEventRecord() *Event {
 	GetDB().Updates(eventToUpdate)
 	return eventToUpdate
+}
+
+func DeleteEvent(eventId uint) {
+
+	//GetDB().Delete(eventToDelete)
+	GetDB().Delete(&Event{}, eventId)
 }
