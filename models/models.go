@@ -58,3 +58,13 @@ type Event struct {
 	Latitude    string `json:"latitude"`
 	Longitude   string `json:"longitude"`
 }
+
+type UpdateEvent struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Start       string `json:"start"`
+	End         string `json:"end"`
+	Location    string `json:"location"`
+	Latitude    string `json:"latitude"`
+	Longitude   string `json:"longitude"`
+}

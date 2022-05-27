@@ -22,16 +22,15 @@ func AddEvent(request *CreateEvent) (*Event, error) {
 		return nil, errors.New(resp)
 	}
 
-	GetDB().Create(event)
-
 	if event.ID <= 0 {
 		return nil, errors.New("failed to create event connection error")
 	}
 
+	GetDB().Create(event)
 	return event, nil
 }
 
-func (eventToCheck *Event) Validate() (bool, string) {
+func (eventToCheck *Event) Validate() (bool, string) { //not finished
 	errs := ""
 	var isOk bool = true
 	if eventToCheck.Title == "" {
@@ -51,4 +50,26 @@ func (eventToCheck *Event) Validate() (bool, string) {
 	}
 
 	return isOk, "Requirement passed"
+}
+
+func GetEvent(eventId uint) *Event {
+
+	event := &Event{}
+	GetDB().Where("id = ?", eventId).First(event)
+
+	return event
+}
+
+func (eventToUpdate *Event) UpdateEventFields(updateFields *UpdateEvent) {
+	//transport new values to event fields from update event structure
+	eventToUpdate.Title = updateFields.Title
+	//ok, resp := eventToUpdate.Validate()
+	/*
+		if !ok {
+			return nil, errors.New(resp)
+		}*/
+}
+func (eventToUpdate *Event) UpdateEventRecord() *Event {
+	GetDB().Updates(eventToUpdate)
+	return eventToUpdate
 }
