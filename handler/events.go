@@ -56,9 +56,14 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 
 	event := models.GetEvent(*eventId)
 	event.UpdateEventFields(&eventUpdate)
-	event.UpdateEventRecord()
+	updatedEvent, err := models.UpdateEventRecord(event)
 
-	c.JSON(http.StatusOK, gin.H{"event": event, "success": true})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"event": updatedEvent, "success": true})
 }
 
 func (h *Handler) test(c *gin.Context) {

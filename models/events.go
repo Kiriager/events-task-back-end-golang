@@ -69,18 +69,19 @@ func (eventToCheck *Event) Validate() (bool, string) { //not finished
 		return false, "Longitude is out of bounds"
 	}
 
-	start, err := time.Parse("2006-01-02 15:04", eventToCheck.Start)
+	const layout = "2006-02-01 15:04"
+	start, err := time.Parse(layout, eventToCheck.Start)
 	if err != nil {
 		return false, "Wrong start data syntax"
 	}
 
-	end, err := time.Parse("2006-01-02 15:04", eventToCheck.End)
+	end, err := time.Parse(layout, eventToCheck.End)
 	if err != nil {
 		return false, "Wrong end data syntax"
 	}
 
-	eventToCheck.Start = start.Format("2022-02-24 04:15")
-	eventToCheck.End = end.Format("2022-02-24 04:15")
+	eventToCheck.Start = start.Format(layout)
+	eventToCheck.End = end.Format(layout)
 
 	if !start.Before(end) {
 		return false, "Start of event must be before end!"
@@ -99,17 +100,38 @@ func GetEvent(eventId uint) *Event {
 
 func (eventToUpdate *Event) UpdateEventFields(updateFields *UpdateEvent) {
 	//transport new values to event fields from update event structure
-	eventToUpdate.Title = updateFields.Title
-	//ok, resp := eventToUpdate.Validate()
-	/*
-		if !ok {
-			return nil, errors.New(resp)
-		}*/
+	if updateFields.Title != "" {
+		eventToUpdate.Title = updateFields.Title
+	}
+	if updateFields.Description != "" {
+		eventToUpdate.Description = updateFields.Description
+	}
+	if updateFields.Location != "" {
+		eventToUpdate.Location = updateFields.Location
+	}
+	if updateFields.Latitude != "" {
+		eventToUpdate.Latitude = updateFields.Latitude
+	}
+	if updateFields.Longitude != "" {
+		eventToUpdate.Longitude = updateFields.Longitude
+	}
+	if updateFields.Start != "" {
+		eventToUpdate.Start = updateFields.Start
+	}
+	if updateFields.End != "" {
+		eventToUpdate.End = updateFields.End
+	}
+
 }
 
-func (eventToUpdate *Event) UpdateEventRecord() *Event {
-	GetDB().Updates(eventToUpdate)
-	return eventToUpdate
+func UpdateEventRecord(updatedEventObject *Event) (*Event, error) {
+	ok, resp := updatedEventObject.Validate()
+
+	if !ok {
+		return nil, errors.New(resp)
+	}
+	GetDB().Updates(updatedEventObject)
+	return updatedEventObject, nil
 }
 
 func DeleteEvent(eventId uint) {
