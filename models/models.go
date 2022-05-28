@@ -39,11 +39,11 @@ type LoginRequest struct {
 }
 
 type CreateEvent struct {
-	Title       string `json:"title" binding:"required"`
-	Description string `json:"description" binding:"required"`
+	Title       string `json:"title" binding:"required, min=2, max=40"`
+	Description string `json:"description" binding:"max=100"`
 	Start       string `json:"start" binding:"required"`
 	End         string `json:"end" binding:"required"`
-	Location    string `json:"location" binding:"required"`
+	Location    string `json:"location" binding:"required, min=2, max=40"`
 	Latitude    string `json:"latitude" binding:"required"`
 	Longitude   string `json:"longitude" binding:"required"`
 }
