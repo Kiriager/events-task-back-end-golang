@@ -227,7 +227,7 @@ func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]E
 }
 
 func ValidateGeoCoords(lat, lng float64) (bool, string) {
-	//var ok bool = true
+
 	if lat < -90 || lat > 90 {
 		return false, "Latitude is out of bounds"
 	}
