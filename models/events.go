@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -90,12 +91,16 @@ func (eventToCheck *Event) Validate() (bool, string) { //not finished
 	return true, "Requirement passed"
 }
 
-func GetEvent(eventId uint) *Event {
+func GetEvent(eventId uint) (*Event, error) {
 
 	event := &Event{}
-	GetDB().Where("id = ?", eventId).First(event)
+	err := GetDB().Where("id = ?", eventId).First(event).Error
+	if err != nil {
+		return nil, err
+	}
+	//fmt.Printf("%T", err)
 
-	return event
+	return event, nil
 }
 
 func (eventToUpdate *Event) UpdateEventFields(updateFields *UpdateEvent) {
@@ -126,16 +131,34 @@ func (eventToUpdate *Event) UpdateEventFields(updateFields *UpdateEvent) {
 
 func UpdateEventRecord(updatedEventObject *Event) (*Event, error) {
 	ok, resp := updatedEventObject.Validate()
-
 	if !ok {
 		return nil, errors.New(resp)
 	}
-	GetDB().Updates(updatedEventObject)
+	GetDB().Updates(updatedEventObject) //error handling
+
 	return updatedEventObject, nil
 }
 
-func DeleteEvent(eventId uint) {
+func DeleteEvent(eventId uint) error {
 
-	//GetDB().Delete(eventToDelete)
-	GetDB().Delete(&Event{}, eventId)
+	err := GetDB().Delete(&Event{}, eventId).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
+
+func FindAllEvents() (*[]Event, error) {
+	//event := &Event{}
+	var allEvents []Event
+	result := GetDB().Find(&allEvents)
+
+	fmt.Println(result.RowsAffected)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &allEvents, nil
+}
+
+// Get all records

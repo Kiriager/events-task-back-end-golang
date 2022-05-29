@@ -34,7 +34,11 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
-	event := models.GetEvent(*eventId)
+	event, err := models.GetEvent(*eventId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"event": event, "success": true})
 }
@@ -54,7 +58,13 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 		return
 	}
 
-	event := models.GetEvent(*eventId)
+	event, err := models.GetEvent(*eventId)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
 	event.UpdateEventFields(&eventUpdate)
 	updatedEvent, err := models.UpdateEventRecord(event)
 
@@ -78,8 +88,21 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 		return
 	}
 
-	models.DeleteEvent(*eventId)
-	event := models.GetEvent(*eventId)
+	err = models.DeleteEvent(*eventId)
 
-	c.JSON(http.StatusOK, gin.H{"event": event, "success": true})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
+func (h *Handler) GetAllEvents(c *gin.Context) {
+	allEvents, err := models.FindAllEvents()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"event": allEvents, "success": true})
 }
