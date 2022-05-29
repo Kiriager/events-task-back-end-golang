@@ -57,17 +57,14 @@ func (eventToCheck *Event) Validate() (bool, string) { //not finished
 		return false, "Latitude should be numeric value"
 	}
 
-	if lat < -90 || lat > 90 {
-		return false, "Latitude is out of bounds"
-	}
-
 	lng, err := strconv.ParseFloat(eventToCheck.Longitude, 64)
 	if err != nil {
 		return false, "Longitude should be numeric value"
 	}
 
-	if lng < -180 || lng > 180 {
-		return false, "Longitude is out of bounds"
+	ok, message := ValidateGeoCoords(lat, lng)
+	if !ok {
+		return false, message
 	}
 
 	const layout = "2006-02-01 15:04"
@@ -161,4 +158,81 @@ func FindAllEvents() (*[]Event, error) {
 	return &allEvents, nil
 }
 
-// Get all records
+func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]Event, error) {
+
+	lat1, err := strconv.ParseFloat(latitude1, 64)
+	if err != nil {
+		return nil, errors.New("latitude should be numeric value")
+	}
+
+	lat2, err := strconv.ParseFloat(latitude2, 64)
+	if err != nil {
+		return nil, errors.New("latitude should be numeric value")
+	}
+
+	lng1, err := strconv.ParseFloat(longitude1, 64)
+	if err != nil {
+		return nil, errors.New("longitude should be numeric value")
+	}
+
+	lng2, err := strconv.ParseFloat(longitude2, 64)
+	if err != nil {
+		return nil, errors.New("longitude should be numeric value")
+	}
+
+	ok, message := ValidateGeoCoords(lat1, lng1)
+	if !ok {
+		return nil, errors.New(message)
+	}
+	ok, message = ValidateGeoCoords(lat2, lng2)
+	if !ok {
+		return nil, errors.New(message)
+	}
+
+	var top, bottom, left, right float64
+
+	if lat1 > lat2 {
+		top = lat1
+		bottom = lat2
+	} else {
+		top = lat2
+		bottom = lat1
+	}
+	if lng1 < lng2 {
+		left = lng1
+		right = lng2
+	} else {
+		left = lng2
+		right = lng1
+	}
+
+	var allEvents []Event
+	var allEventsInArea []Event
+	result := GetDB().Find(&allEvents)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	for _, elem := range allEvents {
+
+		lat, _ := strconv.ParseFloat(elem.Latitude, 64)
+		lng, _ := strconv.ParseFloat(elem.Longitude, 64)
+
+		if lat <= top && lat >= bottom && lng >= left && lng <= right {
+			allEventsInArea = append(allEventsInArea, elem)
+		}
+	}
+
+	return &allEventsInArea, nil
+}
+
+func ValidateGeoCoords(lat, lng float64) (bool, string) {
+	//var ok bool = true
+	if lat < -90 || lat > 90 {
+		return false, "Latitude is out of bounds"
+	}
+	if lng < -180 || lng > 180 {
+		return false, "Longitude is out of bounds"
+	}
+	return true, "coords validated"
+}
