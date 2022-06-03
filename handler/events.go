@@ -25,7 +25,7 @@ func (h *Handler) AddEvent(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"event": event, "success": true})
+	c.JSON(http.StatusOK, gin.H{"event": newEvent, "success": true})
 }
 
 func (h *Handler) ShowEvent(c *gin.Context) {
@@ -44,7 +44,7 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"event": event, "success": true})
 }
 
-func (h *Handler) UpdateEvent(c *gin.Context) {
+/*func (h *Handler) UpdateEvent(c *gin.Context) {
 	eventUpdate := models.UpdateEvent{}
 	err := c.ShouldBindJSON(&eventUpdate)
 
@@ -76,7 +76,7 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"event": updatedEvent, "success": true})
 }
-
+*/
 func (h *Handler) test(c *gin.Context) {
 	fmt.Println("Hello from test")
 }

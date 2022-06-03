@@ -52,3 +52,14 @@ func (locationData *RegisterLocation) ValidateNewLocation() (*Location, error) {
 
 	return validatedLocation, nil
 }
+
+func GetLocation(locationId uint) (*Location, error) {
+
+	location := &Location{}
+	err := GetDB().Where("id = ?", locationId).First(location).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return location, nil
+}

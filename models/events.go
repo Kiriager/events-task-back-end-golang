@@ -39,6 +39,15 @@ func (eventDataToCheck *RegisterEvent) ValidateNewEventData() (*Event, error) {
 		return nil, errors.New("descrition must be less than 50 chars")
 	}
 
+	newEventLocation, err := GetLocation(eventDataToCheck.LocationID)
+	if err != nil {
+		return nil, err
+	}
+
+	if newEventLocation.ID == 0 {
+		return nil, errors.New("location not found")
+	}
+
 	/*
 		const layout = "2006-02-01 15:04"
 		start, err := time.Parse(layout, eventToCheck.Start)
@@ -107,7 +116,7 @@ func (eventToUpdate *Event) UpdateEventFields(updateFields *UpdateEvent) {
 
 }
 
-func UpdateEventRecord(updatedEventObject *Event) (*Event, error) {
+/*func UpdateEventRecord(updatedEventObject *Event) (*Event, error) {
 	ok, resp := updatedEventObject.Validate()
 	if !ok {
 		return nil, errors.New(resp)
@@ -115,7 +124,7 @@ func UpdateEventRecord(updatedEventObject *Event) (*Event, error) {
 	GetDB().Updates(updatedEventObject) //error handling
 
 	return updatedEventObject, nil
-}
+}*/
 
 func DeleteEvent(eventId uint) error {
 
