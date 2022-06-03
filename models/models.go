@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
 )
@@ -39,24 +41,24 @@ type LoginRequest struct {
 }
 
 type CreateEvent struct {
-	Title       string `json:"title" binding:"required"`
-	Description string `json:"description"`
-	Start       string `json:"start" binding:"required"`
-	End         string `json:"end" binding:"required"`
-	Location    string `json:"location" binding:"required"`
-	Latitude    string `json:"latitude" binding:"required"`
-	Longitude   string `json:"longitude" binding:"required"`
+	Title       string    `json:"title" binding:"required"`
+	Description string    `json:"description"`
+	Start       time.Time `json:"start" binding:"required"`
+	End         time.Time `json:"end" binding:"required"`
+	//Location    string    `json:"location" binding:"required"`
+	//Latitude    string `json:"latitude" binding:"required"`
+	//Longitude   string `json:"longitude" binding:"required"`
 }
 
 type Event struct {
 	gorm.Model
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Start       string `json:"start"`
-	End         string `json:"end"`
-	Location    string `json:"location"`
-	Latitude    string `json:"latitude"`
-	Longitude   string `json:"longitude"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Start       time.Time `json:"start"`
+	End         time.Time `json:"end"`
+	//Location    string    `json:"location"`
+	//Latitude    string    `json:"latitude"`
+	//Longitude   string    `json:"longitude"`
 }
 
 type UpdateEvent struct {
@@ -78,8 +80,8 @@ type Location struct {
 }
 
 type RegisterLocation struct {
-	Title       string `json:"title" binding:"required"`
-	Description string `json:"description"`
+	Title       string  `json:"title" binding:"required"`
+	Description string  `json:"description"`
 	Latitude    float64 `json:"latitude" binding:"required"`
 	Longitude   float64 `json:"longitude" binding:"required"`
 }

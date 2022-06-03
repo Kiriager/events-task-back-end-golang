@@ -106,7 +106,7 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"event": allEvents, "success": true})
 }
-
+/*
 func (h *Handler) GetEventsInArea(c *gin.Context) {
 
 	lat1 := c.Query("lat1")
@@ -122,3 +122,4 @@ func (h *Handler) GetEventsInArea(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"event": eventsInArea, "success": true})
 }
+*/

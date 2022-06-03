@@ -3,9 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
-	"time"
 )
 
 func AddEvent(request *CreateEvent) (*Event, error) {
@@ -15,9 +13,6 @@ func AddEvent(request *CreateEvent) (*Event, error) {
 		Description: request.Description,
 		Start:       request.Start,
 		End:         request.End,
-		Location:    request.Location,
-		Latitude:    request.Latitude,
-		Longitude:   request.Longitude,
 	}
 	ok, resp := event.Validate()
 
@@ -46,42 +41,22 @@ func (eventToCheck *Event) Validate() (bool, string) { //not finished
 		return false, "The descrition must be less than 50 chars! "
 	}
 
-	eventToCheck.Location = strings.Join(strings.Fields(eventToCheck.Location), " ")
+	/*
+		const layout = "2006-02-01 15:04"
+		start, err := time.Parse(layout, eventToCheck.Start)
+		if err != nil {
+			return false, "Wrong start data syntax"
+		}
 
-	if len(eventToCheck.Location) < 6 || len(eventToCheck.Location) > 40 {
-		return false, "The Location field must be between 6-40 chars! "
-	}
+		end, err := time.Parse(layout, eventToCheck.End)
+		if err != nil {
+			return false, "Wrong end data syntax"
+		}
+	*/
+	//eventToCheck.Start = start.Format(layout)
+	//eventToCheck.End = end.Format(layout)
 
-	lat, err := strconv.ParseFloat(eventToCheck.Latitude, 64)
-	if err != nil {
-		return false, "Latitude should be numeric value"
-	}
-
-	lng, err := strconv.ParseFloat(eventToCheck.Longitude, 64)
-	if err != nil {
-		return false, "Longitude should be numeric value"
-	}
-
-	ok, message := ValidateGeoCoords(lat, lng)
-	if !ok {
-		return false, message
-	}
-
-	const layout = "2006-02-01 15:04"
-	start, err := time.Parse(layout, eventToCheck.Start)
-	if err != nil {
-		return false, "Wrong start data syntax"
-	}
-
-	end, err := time.Parse(layout, eventToCheck.End)
-	if err != nil {
-		return false, "Wrong end data syntax"
-	}
-
-	eventToCheck.Start = start.Format(layout)
-	eventToCheck.End = end.Format(layout)
-
-	if !start.Before(end) {
+	if !eventToCheck.Start.Before(eventToCheck.End) {
 		return false, "Start of event must be before end!"
 	}
 
@@ -108,7 +83,7 @@ func (eventToUpdate *Event) UpdateEventFields(updateFields *UpdateEvent) {
 	if updateFields.Description != "" {
 		eventToUpdate.Description = updateFields.Description
 	}
-	if updateFields.Location != "" {
+	/*if updateFields.Location != "" {
 		eventToUpdate.Location = updateFields.Location
 	}
 	if updateFields.Latitude != "" {
@@ -116,13 +91,13 @@ func (eventToUpdate *Event) UpdateEventFields(updateFields *UpdateEvent) {
 	}
 	if updateFields.Longitude != "" {
 		eventToUpdate.Longitude = updateFields.Longitude
-	}
-	if updateFields.Start != "" {
+	}*/
+	/*if updateFields.Start != "" {
 		eventToUpdate.Start = updateFields.Start
 	}
 	if updateFields.End != "" {
 		eventToUpdate.End = updateFields.End
-	}
+	}*/
 
 }
 
@@ -158,6 +133,7 @@ func FindAllEvents() (*[]Event, error) {
 	return &allEvents, nil
 }
 
+/*
 func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]Event, error) {
 
 	lat1, err := strconv.ParseFloat(latitude1, 64)
@@ -225,7 +201,7 @@ func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]E
 
 	return &allEventsInArea, nil
 }
-
+*/
 func ValidateGeoCoords(lat, lng float64) (bool, string) {
 
 	if lat < -90 || lat > 90 {
