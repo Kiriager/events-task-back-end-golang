@@ -108,14 +108,12 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 }
 
 func (h *Handler) GetEventsInArea(c *gin.Context) {
-	//top left corner of the area
+
 	lat1 := c.Query("lat1")
 	lng1 := c.Query("lng1")
-	//bottom right corner of the area
+
 	lat2 := c.Query("lat2")
 	lng2 := c.Query("lng2")
-
-	fmt.Print(lat1 + " " + lng1 + " " + lat2 + " " + lng2) //delete
 
 	eventsInArea, err := models.FindEventsInArea(lat1, lng1, lat2, lng2)
 	if err != nil {

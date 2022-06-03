@@ -68,3 +68,18 @@ type UpdateEvent struct {
 	Latitude    string `json:"latitude"`
 	Longitude   string `json:"longitude"`
 }
+
+type Location struct {
+	gorm.Model
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+}
+
+type RegisterLocation struct {
+	Title       string `json:"title" binding:"required"`
+	Description string `json:"description"`
+	Latitude    string `json:"latitude" binding:"required"`
+	Longitude   string `json:"longitude" binding:"required"`
+}

@@ -33,7 +33,8 @@ func init() {
 	err = db.Debug().AutoMigrate(
 		&User{},
 		&UserAuth{},
-		&Event{}) //Database migration
+		&Event{},
+		&Location{}) //Database migration
 	if err != nil {
 		return
 	}
