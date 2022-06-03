@@ -9,15 +9,16 @@ import (
 )
 
 func (h *Handler) AddEvent(c *gin.Context) {
-	eventCreate := models.CreateEvent{}
-	err := c.ShouldBindJSON(&eventCreate)
+	eventRegisterRequest := models.RegisterEvent{}
+	err := c.ShouldBindJSON(&eventRegisterRequest)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
 
-	event, err := models.AddEvent(&eventCreate)
+	newEvent, err := models.RecordEvent(&eventRegisterRequest)
+	//newLocation, err := models.RecordLocation(&locationData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
@@ -106,6 +107,7 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"event": allEvents, "success": true})
 }
+
 /*
 func (h *Handler) GetEventsInArea(c *gin.Context) {
 

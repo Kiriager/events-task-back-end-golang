@@ -40,14 +40,12 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type CreateEvent struct {
+type RegisterEvent struct {
 	Title       string    `json:"title" binding:"required"`
 	Description string    `json:"description"`
 	Start       time.Time `json:"start" binding:"required"`
 	End         time.Time `json:"end" binding:"required"`
-	//Location    string    `json:"location" binding:"required"`
-	//Latitude    string `json:"latitude" binding:"required"`
-	//Longitude   string `json:"longitude" binding:"required"`
+	LocationID  uint      `json:"locationid" binding:"required"`
 }
 
 type Event struct {
@@ -56,9 +54,7 @@ type Event struct {
 	Description string    `json:"description"`
 	Start       time.Time `json:"start"`
 	End         time.Time `json:"end"`
-	//Location    string    `json:"location"`
-	//Latitude    string    `json:"latitude"`
-	//Longitude   string    `json:"longitude"`
+	LocationID  uint      `json:"locationid"`
 }
 
 type UpdateEvent struct {

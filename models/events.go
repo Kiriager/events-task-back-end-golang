@@ -6,39 +6,37 @@ import (
 	"strings"
 )
 
-func AddEvent(request *CreateEvent) (*Event, error) {
-
-	event := &Event{
-		Title:       request.Title,
-		Description: request.Description,
-		Start:       request.Start,
-		End:         request.End,
-	}
-	ok, resp := event.Validate()
-
-	if !ok {
-		return nil, errors.New(resp)
-	}
-	GetDB().Create(event)
-	if event.ID <= 0 {
-		return nil, errors.New("failed to create event connection error")
+func RecordEvent(newEventData *RegisterEvent) (*Event, error) {
+	newEvent, err := newEventData.ValidateNewEventData()
+	if err != nil {
+		return nil, err
 	}
 
-	return event, nil
+	err = GetDB().Create(newEvent).Error
+	if err != nil {
+		return nil, err
+	}
+	/*
+		if newEvent.ID <= 0 {
+			return nil, errors.New("failed to create event connection error")
+		}
+	*/
+	return newEvent, nil
 }
 
-func (eventToCheck *Event) Validate() (bool, string) { //not finished
+func (eventDataToCheck *RegisterEvent) ValidateNewEventData() (*Event, error) {
+	//not finished, add location validation
 
-	eventToCheck.Title = strings.Join(strings.Fields(eventToCheck.Title), " ")
+	eventDataToCheck.Title = strings.Join(strings.Fields(eventDataToCheck.Title), " ")
 
-	if len(eventToCheck.Title) < 2 || len(eventToCheck.Title) > 40 {
-		return false, "Title must be 2-40 chars long"
+	if len(eventDataToCheck.Title) < 4 || len(eventDataToCheck.Title) > 40 {
+		return nil, errors.New("title must be 4-40 chars long")
 	}
 
-	eventToCheck.Description = strings.Join(strings.Fields(eventToCheck.Description), " ")
+	eventDataToCheck.Description = strings.Join(strings.Fields(eventDataToCheck.Description), " ")
 
-	if len(eventToCheck.Description) > 50 {
-		return false, "The descrition must be less than 50 chars! "
+	if len(eventDataToCheck.Description) > 50 {
+		return nil, errors.New("descrition must be less than 50 chars")
 	}
 
 	/*
@@ -56,11 +54,19 @@ func (eventToCheck *Event) Validate() (bool, string) { //not finished
 	//eventToCheck.Start = start.Format(layout)
 	//eventToCheck.End = end.Format(layout)
 
-	if !eventToCheck.Start.Before(eventToCheck.End) {
-		return false, "Start of event must be before end!"
+	if !eventDataToCheck.Start.Before(eventDataToCheck.End) {
+		return nil, errors.New("start of event must be before end")
 	}
 
-	return true, "Requirement passed"
+	newEvent := &Event{
+		Title:       eventDataToCheck.Title,
+		Description: eventDataToCheck.Description,
+		Start:       eventDataToCheck.Start,
+		End:         eventDataToCheck.End,
+		LocationID:  eventDataToCheck.LocationID,
+	}
+
+	return newEvent, nil
 }
 
 func GetEvent(eventId uint) (*Event, error) {
