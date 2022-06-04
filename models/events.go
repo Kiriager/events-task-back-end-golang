@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 )
 
@@ -124,51 +125,6 @@ func UpdateEventRecord(updateEventData *UpdateEvent, eventId *uint) (*Event, err
 	return updatedEventRecord, nil
 }
 
-/*
-func (updateEventData *UpdateEvent) validateUpdateEventData() (*Event, error) {
-	updateEventData.Title = strings.Join(strings.Fields(updateEventData.Title), " ")
-
-	if updateEventData.Title != "" {
-		if len(updateEventData.Title) < 4 || len(updateEventData.Title) > 40 {
-			return nil, errors.New("title must be 4-40 chars long")
-		}
-	}
-
-	updateEventData.Description = strings.Join(strings.Fields(updateEventData.Description), " ")
-
-	if updateEventData.Description != "" {
-		if len(updateEventData.Description) > 50 {
-			return nil, errors.New("descrition must be less than 50 chars")
-		}
-	}
-
-	if updateEventData.LocationID != 0 {
-		newEventLocation, err := GetLocation(updateEventData.LocationID)
-		if err != nil {
-			return nil, err
-		}
-
-		if newEventLocation.ID == 0 {
-			return nil, errors.New("location not found")
-		}
-	}
-
-	if !eventDataToCheck.End.Before(eventDataToCheck.End) {
-		return nil, errors.New("start of event must be before end")
-	}
-
-	newEvent := &Event{
-		Title:       eventDataToCheck.Title,
-		Description: eventDataToCheck.Description,
-		Start:       eventDataToCheck.Start,
-		End:         eventDataToCheck.End,
-		LocationID:  eventDataToCheck.LocationID,
-	}
-
-	return newEvent, nil
-}
-*/
-
 func DeleteEvent(eventId uint) error {
 	err := GetDB().Delete(&Event{}, eventId).Error
 	if err != nil {
@@ -189,7 +145,6 @@ func FindAllEvents() (*[]Event, error) {
 	return &allEvents, nil
 }
 
-/*
 func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]Event, error) {
 
 	lat1, err := strconv.ParseFloat(latitude1, 64)
@@ -212,13 +167,13 @@ func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]E
 		return nil, errors.New("longitude should be numeric value")
 	}
 
-	ok, message := ValidateGeoCoords(lat1, lng1)
-	if !ok {
-		return nil, errors.New(message)
+	err = ValidateGeoCoords(lat1, lng1)
+	if err != nil {
+		return nil, err
 	}
-	ok, message = ValidateGeoCoords(lat2, lng2)
-	if !ok {
-		return nil, errors.New(message)
+	err = ValidateGeoCoords(lat2, lng2)
+	if err != nil {
+		return nil, err
 	}
 
 	var top, bottom, left, right float64
@@ -240,24 +195,36 @@ func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]E
 
 	var allEvents []Event
 	var allEventsInArea []Event
-	result := GetDB().Find(&allEvents)
-
-	if result.Error != nil {
-		return nil, result.Error
+	err = GetDB().Find(&allEvents).Error
+	if err != nil {
+		return nil, err
 	}
+
 	for _, elem := range allEvents {
+		elemLocation, err := GetLocation(elem.LocationID)
+		if err != nil {
+			return nil, err
+		}
+		inArea, err := elemLocation.IsInArea(top, right, bottom, left)
 
-		lat, _ := strconv.ParseFloat(elem.Latitude, 64)
-		lng, _ := strconv.ParseFloat(elem.Longitude, 64)
-
-		if lat <= top && lat >= bottom && lng >= left && lng <= right {
+		if inArea {
 			allEventsInArea = append(allEventsInArea, elem)
 		}
+		/*
+
+			lat, _ := strconv.ParseFloat(elem.Latitude, 64)
+			lng, _ := strconv.ParseFloat(elem.Longitude, 64)
+
+			if lat <= top && lat >= bottom && lng >= left && lng <= right {
+				allEventsInArea = append(allEventsInArea, elem)
+			}
+
+		*/
 	}
 
 	return &allEventsInArea, nil
 }
-*/
+
 func ValidateGeoCoords(lat, lng float64) error {
 
 	if lat < -90 || lat > 90 {

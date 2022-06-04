@@ -63,3 +63,36 @@ func GetLocation(locationId uint) (*Location, error) {
 
 	return location, nil
 }
+
+func (location *Location) IsInArea(lat1, lng1, lat2, lng2 float64) (bool, error) {
+	err := ValidateGeoCoords(lat1, lng1)
+	if err != nil {
+		return false, err
+	}
+	err = ValidateGeoCoords(lat2, lng2)
+	if err != nil {
+		return false, err
+	}
+
+	var top, bottom, left, right float64
+
+	if lat1 > lat2 {
+		top = lat1
+		bottom = lat2
+	} else {
+		top = lat2
+		bottom = lat1
+	}
+	if lng1 < lng2 {
+		left = lng1
+		right = lng2
+	} else {
+		left = lng2
+		right = lng1
+	}
+
+	if location.Latitude <= top && location.Latitude >= bottom && location.Longitude >= left && location.Longitude <= right {
+		return true, nil
+	}
+	return false, nil
+}
