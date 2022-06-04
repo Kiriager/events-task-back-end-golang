@@ -10,16 +10,14 @@ import (
 
 func (h *Handler) AddEvent(c *gin.Context) {
 	eventRegisterRequest := models.RegisterEvent{}
-	err := c.ShouldBindJSON(&eventRegisterRequest)
 
+	err := c.ShouldBindJSON(&eventRegisterRequest)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
 
 	newEvent, err := models.RecordNewEvent(&eventRegisterRequest)
-	//newLocation, err := models.RecordLocation(&locationData)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -29,12 +27,12 @@ func (h *Handler) AddEvent(c *gin.Context) {
 }
 
 func (h *Handler) ShowEvent(c *gin.Context) {
-
 	eventId, err := h.getPathParamUint(c, "eventId")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
+
 	event, err := models.GetEvent(*eventId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
@@ -58,17 +56,12 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
+	fmt.Println(eventId)
 
-	//event.UpdateEventFields(&eventUpdateData)
 	updatedEvent, err := models.UpdateEventRecord(&eventUpdateData, eventId)
 
 	//upEvent, err := models.RecordEvent(&eventRegisterRequest)
 	//newLocation, err := models.RecordLocation(&locationData)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
-		return
-	}
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})

@@ -7,8 +7,9 @@ import (
 )
 
 func RecordNewEvent(newEventData *RegisterEvent) (*Event, error) {
+	newEvent := newEventData.constructEvent()
 
-	newEvent, err := newEventData.ValidateNewEventData()
+	err := newEvent.ValidateEvent()
 	if err != nil {
 		return nil, err
 	}
@@ -25,47 +26,49 @@ func RecordNewEvent(newEventData *RegisterEvent) (*Event, error) {
 	return newEvent, nil
 }
 
-func (eventDataToCheck *RegisterEvent) ValidateNewEventData() (*Event, error) {
+func (eventData *RegisterEvent) constructEvent() *Event {
 
-	eventDataToCheck.Title = strings.Join(strings.Fields(eventDataToCheck.Title), " ")
-
-	if len(eventDataToCheck.Title) < 4 || len(eventDataToCheck.Title) > 40 {
-		return nil, errors.New("title must be 4-40 chars long")
+	newEvent := &Event{
+		Title:       eventData.Title,
+		Description: eventData.Description,
+		Start:       eventData.Start,
+		End:         eventData.End,
+		LocationID:  eventData.LocationID,
 	}
 
-	eventDataToCheck.Description = strings.Join(strings.Fields(eventDataToCheck.Description), " ")
+	return newEvent
+}
 
-	if len(eventDataToCheck.Description) > 50 {
-		return nil, errors.New("descrition must be less than 50 chars")
+func (eventToCheck *Event) ValidateEvent() error {
+	eventToCheck.Title = strings.Join(strings.Fields(eventToCheck.Title), " ")
+	if len(eventToCheck.Title) < 4 || len(eventToCheck.Title) > 40 {
+		return errors.New("title must be 4-40 chars long")
 	}
 
-	newEventLocation, err := GetLocation(eventDataToCheck.LocationID)
+	eventToCheck.Description = strings.Join(strings.Fields(eventToCheck.Description), " ")
+	if len(eventToCheck.Description) > 50 {
+		return errors.New("descrition must be less than 50 chars")
+	}
+
+	newEventLocation, err := GetLocation(eventToCheck.LocationID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if newEventLocation.ID == 0 {
-		return nil, errors.New("location not found")
+		return errors.New("location not found")
 	}
 
-	if !eventDataToCheck.Start.Before(eventDataToCheck.End) {
-		return nil, errors.New("start of event must be before end")
+	if !eventToCheck.Start.Before(eventToCheck.End) {
+		return errors.New("start of event must be before end")
 	}
 
-	newEvent := &Event{
-		Title:       eventDataToCheck.Title,
-		Description: eventDataToCheck.Description,
-		Start:       eventDataToCheck.Start,
-		End:         eventDataToCheck.End,
-		LocationID:  eventDataToCheck.LocationID,
-	}
-
-	return newEvent, nil
+	return nil
 }
 
 func GetEvent(eventId uint) (*Event, error) {
-
 	event := &Event{}
+
 	err := GetDB().Where("id = ?", eventId).First(event).Error
 	if err != nil {
 		return nil, err
@@ -74,45 +77,39 @@ func GetEvent(eventId uint) (*Event, error) {
 	return event, nil
 }
 
-func (eventToUpdate *Event) UpdateEventFields(updateFields *UpdateEvent) {
-	//transport new values to event fields from update event structure
-	if updateFields.Title != "" {
-		eventToUpdate.Title = updateFields.Title
+func (eventToUpdate *Event) UpdateEventFields(updateData *UpdateEvent) {
+
+	if updateData.Title != "" {
+		eventToUpdate.Title = updateData.Title
 	}
-	if updateFields.Description != "" {
-		eventToUpdate.Description = updateFields.Description
+	if updateData.Description != "" {
+		eventToUpdate.Description = updateData.Description
 	}
-	/*if updateFields.Location != "" {
-		eventToUpdate.Location = updateFields.Location
+
+	if updateData.Start.IsZero() != true {
+		eventToUpdate.Start = updateData.Start
 	}
-	if updateFields.Latitude != "" {
-		eventToUpdate.Latitude = updateFields.Latitude
+	if updateData.End.IsZero() != true {
+		eventToUpdate.End = updateData.End
 	}
-	if updateFields.Longitude != "" {
-		eventToUpdate.Longitude = updateFields.Longitude
-	}*/
-	/*if updateFields.Start != "" {
-		eventToUpdate.Start = updateFields.Start
-	}
-	if updateFields.End != "" {
-		eventToUpdate.End = updateFields.End
-	}*/
+	eventToUpdate.LocationID = updateData.LocationID
 
 }
 
 func UpdateEventRecord(updateEventData *UpdateEvent, eventId *uint) (*Event, error) {
 	eventToUpdate, err := GetEvent(*eventId)
-
 	if err != nil {
 		return nil, err
 	}
 
-	updatedEventObject, err := updateEventData.validateUpdateEventData(eventToUpdate)
+	eventToUpdate.UpdateEventFields(updateEventData)
+
+	err = eventToUpdate.ValidateEvent()
 	if err != nil {
 		return nil, err
 	}
 
-	err = GetDB().Updates(updatedEventObject).Error
+	err = GetDB().Updates(eventToUpdate).Where("id = ?", eventId).Error
 	if err != nil {
 		return nil, err
 	}
@@ -123,45 +120,6 @@ func UpdateEventRecord(updateEventData *UpdateEvent, eventId *uint) (*Event, err
 	}
 
 	return updatedEventRecord, nil
-}
-func (updateEventData *UpdateEvent) validateUpdateEventData(eventToUpdate *Event) (*Event, error) {
-	objectToValidate := &RegisterEvent{}
-	if updateEventData.Title == "" {
-		objectToValidate.Title = eventToUpdate.Title
-	} else {
-		objectToValidate.Title = updateEventData.Title
-	}
-
-	if updateEventData.Description == "" {
-		objectToValidate.Description = eventToUpdate.Description
-	} else {
-		objectToValidate.Description = updateEventData.Description
-	}
-
-	if updateEventData.Start.IsZero() == true {
-		objectToValidate.Start = eventToUpdate.Start
-	} else {
-		objectToValidate.Start = updateEventData.Start
-	}
-
-	if updateEventData.End.IsZero() == true {
-		objectToValidate.End = eventToUpdate.End
-	} else {
-		objectToValidate.End = updateEventData.End
-	}
-
-	if updateEventData.LocationID == 0 {
-		objectToValidate.LocationID = eventToUpdate.LocationID
-	} else {
-		objectToValidate.LocationID = updateEventData.LocationID
-	}
-
-	updatedEvent, err := objectToValidate.ValidateNewEventData()
-	if err != nil {
-		return nil, err
-	}
-
-	return updatedEvent, nil
 }
 
 /*
