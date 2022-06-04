@@ -38,9 +38,9 @@ func (locationData *RegisterLocation) ValidateNewLocation() (*Location, error) {
 	lat := locationData.Latitude
 	lng := locationData.Longitude
 
-	ok, message := ValidateGeoCoords(lat, lng)
-	if !ok {
-		return nil, errors.New(message)
+	err := ValidateGeoCoords(lat, lng)
+	if err != nil {
+		return nil, err
 	}
 
 	validatedLocation := &Location{

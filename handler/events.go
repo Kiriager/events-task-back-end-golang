@@ -17,7 +17,7 @@ func (h *Handler) AddEvent(c *gin.Context) {
 		return
 	}
 
-	newEvent, err := models.RecordEvent(&eventRegisterRequest)
+	newEvent, err := models.RecordNewEvent(&eventRegisterRequest)
 	//newLocation, err := models.RecordLocation(&locationData)
 
 	if err != nil {
@@ -44,9 +44,9 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"event": event, "success": true})
 }
 
-/*func (h *Handler) UpdateEvent(c *gin.Context) {
-	eventUpdate := models.UpdateEvent{}
-	err := c.ShouldBindJSON(&eventUpdate)
+func (h *Handler) UpdateEvent(c *gin.Context) {
+	eventUpdateData := models.UpdateEvent{}
+	err := c.ShouldBindJSON(&eventUpdateData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
@@ -59,15 +59,16 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 		return
 	}
 
-	event, err := models.GetEvent(*eventId)
+	//event.UpdateEventFields(&eventUpdateData)
+	updatedEvent, err := models.UpdateEventRecord(&eventUpdateData, eventId)
+
+	//upEvent, err := models.RecordEvent(&eventRegisterRequest)
+	//newLocation, err := models.RecordLocation(&locationData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
-
-	event.UpdateEventFields(&eventUpdate)
-	updatedEvent, err := models.UpdateEventRecord(event)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
@@ -76,7 +77,7 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"event": updatedEvent, "success": true})
 }
-*/
+
 func (h *Handler) test(c *gin.Context) {
 	fmt.Println("Hello from test")
 }

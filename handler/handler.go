@@ -44,7 +44,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			event.GET("/:eventId/show", h.ShowEvent)
 			event.GET("/all-events", h.GetAllEvents)
 			//event.GET("/in-area", h.GetEventsInArea)
-			//event.PUT("/:eventId", h.UpdateEvent)
+			event.PUT("/:eventId", h.UpdateEvent)
 			event.DELETE("/:eventId", h.DeleteEvent)
 		}
 		location := api.Group("/location")
