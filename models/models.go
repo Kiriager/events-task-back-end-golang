@@ -62,7 +62,7 @@ type UpdateEvent struct {
 	Description string    `json:"description"`
 	Start       time.Time `json:"start"`
 	End         time.Time `json:"end"`
-	LocationID  uint      `json:"location"`
+	LocationID  uint      `json:"locationid"`
 }
 
 type Location struct {

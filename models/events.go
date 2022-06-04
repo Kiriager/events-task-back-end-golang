@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 )
 
@@ -86,17 +85,20 @@ func (eventToUpdate *Event) UpdateEventFields(updateData *UpdateEvent) {
 		eventToUpdate.Description = updateData.Description
 	}
 
-	if updateData.Start.IsZero() != true {
+	if !updateData.Start.IsZero() {
 		eventToUpdate.Start = updateData.Start
 	}
-	if updateData.End.IsZero() != true {
+	if !updateData.End.IsZero() {
 		eventToUpdate.End = updateData.End
 	}
-	eventToUpdate.LocationID = updateData.LocationID
+	if updateData.LocationID != 0 {
+		eventToUpdate.LocationID = updateData.LocationID
+	}
 
 }
 
 func UpdateEventRecord(updateEventData *UpdateEvent, eventId *uint) (*Event, error) {
+
 	eventToUpdate, err := GetEvent(*eventId)
 	if err != nil {
 		return nil, err
@@ -109,7 +111,7 @@ func UpdateEventRecord(updateEventData *UpdateEvent, eventId *uint) (*Event, err
 		return nil, err
 	}
 
-	err = GetDB().Updates(eventToUpdate).Where("id = ?", eventId).Error
+	err = GetDB().Updates(eventToUpdate).Where("id = ?", *eventId).Error
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +181,7 @@ func FindAllEvents() (*[]Event, error) {
 	var allEvents []Event
 	result := GetDB().Find(&allEvents)
 
-	fmt.Println(result.RowsAffected)
+	//fmt.Println(result.RowsAffected)
 
 	if result.Error != nil {
 		return nil, result.Error
