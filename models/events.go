@@ -27,13 +27,15 @@ func RecordNewEvent(newEventData *RegisterEvent) (*Event, error) {
 }
 
 func (eventData *RegisterEvent) constructEvent() *Event {
+	//location, _ := GetLocation(eventData.LocationID)
 
 	newEvent := &Event{
 		Title:       eventData.Title,
 		Description: eventData.Description,
 		Start:       eventData.Start,
 		End:         eventData.End,
-		LocationID:  eventData.LocationID,
+		LocationId:  eventData.LocationId,
+		//Location:    *location,
 	}
 
 	return newEvent
@@ -50,7 +52,7 @@ func (eventToCheck *Event) ValidateEvent() error {
 		return errors.New("descrition must be less than 50 chars")
 	}
 
-	newEventLocation, err := GetLocation(eventToCheck.LocationID)
+	newEventLocation, err := GetLocation(eventToCheck.LocationId)
 	if err != nil {
 		return err
 	}
@@ -69,7 +71,7 @@ func (eventToCheck *Event) ValidateEvent() error {
 func GetEvent(eventId uint) (*Event, error) {
 	event := &Event{}
 
-	err := GetDB().Where("id = ?", eventId).First(event).Error
+	err := GetDB().Where("id = ?", eventId).Preload("Location").First(event).Error
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +94,8 @@ func (eventToUpdate *Event) UpdateEventFields(updateData *UpdateEvent) {
 	if !updateData.End.IsZero() {
 		eventToUpdate.End = updateData.End
 	}
-	if updateData.LocationID != 0 {
-		eventToUpdate.LocationID = updateData.LocationID
+	if updateData.LocationId != 0 {
+		eventToUpdate.LocationId = updateData.LocationId
 	}
 
 }
@@ -143,6 +145,29 @@ func FindAllEvents() (*[]Event, error) {
 		return nil, result.Error
 	}
 	return &allEvents, nil
+}
+
+func FindAllEventsInLocation(locationId uint) ([]Event, error) {
+	location, err := GetLocation(locationId)
+	if err != nil {
+		return nil, err
+	}
+
+	events := []Event{}
+	// GetDB().Debug().Preload("Events").Find(&location)
+	// events = location.Events
+	GetDB().Model(&location).Debug().Association("Events").Find(&events)
+	//err = db.Find(&events).Error
+	/*for i, _ := range events {
+		GetDB().Model(events[i]).Related(&events[i].Location)
+	}*/
+	//events := GetDB().Model(location).Association("Events")
+	//GetDB().Find(&events).Related()
+
+	//fmt.Println(events)
+
+	//fmt.Println(eventsInLocation)
+	return events, nil
 }
 
 func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]Event, error) {
@@ -201,12 +226,15 @@ func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]E
 	}
 
 	for _, elem := range allEvents {
-		elemLocation, err := GetLocation(elem.LocationID)
+		elemLocation, err := GetLocation(elem.LocationId)
 		if err != nil {
 			return nil, err
 		}
 		inArea, err := elemLocation.IsInArea(top, right, bottom, left)
 
+		if err != nil {
+			return nil, err
+		}
 		if inArea {
 			allEventsInArea = append(allEventsInArea, elem)
 		}

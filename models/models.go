@@ -21,8 +21,16 @@ type User struct {
 	gorm.Model
 	Email    string `json:"email"`
 	Password string `json:"password,omitempty"`
+	Role     *Role  `json:"role"`
 	Token    string `json:"token,omitempty" sql:"-"`
 }
+
+type Role string
+
+const (
+	Regular Role = "regular"
+	Admin   Role = "admin"
+)
 
 type UserAuth struct {
 	gorm.Model
@@ -45,7 +53,7 @@ type RegisterEvent struct {
 	Description string    `json:"description"`
 	Start       time.Time `json:"start" binding:"required"`
 	End         time.Time `json:"end" binding:"required"`
-	LocationID  uint      `json:"locationid" binding:"required"`
+	LocationId  uint      `json:"locationid" binding:"required"`
 }
 
 type Event struct {
@@ -54,7 +62,8 @@ type Event struct {
 	Description string    `json:"description"`
 	Start       time.Time `json:"start"`
 	End         time.Time `json:"end"`
-	LocationID  uint      `json:"locationid"`
+	LocationId  uint      `json:"locationid"`
+	Location    Location  `gorm:"ForeignKey:LocationId"`
 }
 
 type UpdateEvent struct {
@@ -62,7 +71,7 @@ type UpdateEvent struct {
 	Description string    `json:"description"`
 	Start       time.Time `json:"start"`
 	End         time.Time `json:"end"`
-	LocationID  uint      `json:"locationid"`
+	LocationId  uint      `json:"locationid"`
 }
 
 type Location struct {
@@ -71,6 +80,7 @@ type Location struct {
 	Description string  `json:"description"`
 	Latitude    float64 `json:"latitude"`
 	Longitude   float64 `json:"longitude"`
+	Events      []Event //`gorm:"ForeignKey:LocationId"`
 }
 
 type RegisterLocation struct {

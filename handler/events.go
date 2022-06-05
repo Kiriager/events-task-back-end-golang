@@ -98,6 +98,21 @@ func (h *Handler) GetAllEvents(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"event": allEvents, "success": true})
 }
 
+func (h *Handler) GetEventsInLocation(c *gin.Context) {
+	locationId, err := h.getPathParamUint(c, "locationId")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	eventsInLocation, err := models.FindAllEventsInLocation(*locationId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"event": eventsInLocation, "success": true})
+}
 
 func (h *Handler) GetEventsInArea(c *gin.Context) {
 
@@ -114,4 +129,3 @@ func (h *Handler) GetEventsInArea(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"event": eventsInArea, "success": true})
 }
-
