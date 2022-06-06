@@ -152,21 +152,10 @@ func FindAllEventsInLocation(locationId uint) ([]Event, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	events := []Event{}
 	// GetDB().Debug().Preload("Events").Find(&location)
 	// events = location.Events
 	GetDB().Model(&location).Debug().Association("Events").Find(&events)
-	//err = db.Find(&events).Error
-	/*for i, _ := range events {
-		GetDB().Model(events[i]).Related(&events[i].Location)
-	}*/
-	//events := GetDB().Model(location).Association("Events")
-	//GetDB().Find(&events).Related()
-
-	//fmt.Println(events)
-
-	//fmt.Println(eventsInLocation)
 	return events, nil
 }
 
@@ -192,62 +181,28 @@ func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]E
 		return nil, errors.New("longitude should be numeric value")
 	}
 
-	err = ValidateGeoCoords(lat1, lng1)
-	if err != nil {
-		return nil, err
-	}
-	err = ValidateGeoCoords(lat2, lng2)
-	if err != nil {
-		return nil, err
-	}
-
-	var top, bottom, left, right float64
-
-	if lat1 > lat2 {
-		top = lat1
-		bottom = lat2
-	} else {
-		top = lat2
-		bottom = lat1
-	}
-	if lng1 < lng2 {
-		left = lng1
-		right = lng2
-	} else {
-		left = lng2
-		right = lng1
-	}
-
-	var allEvents []Event
 	var allEventsInArea []Event
-	err = GetDB().Find(&allEvents).Error
+	var allLocations []Location
+
+	err = GetDB().Find(&allLocations).Error
 	if err != nil {
 		return nil, err
 	}
 
-	for _, elem := range allEvents {
-		elemLocation, err := GetLocation(elem.LocationId)
+	for _, elem := range allLocations {
+		inArea, err := elem.IsInArea(lat1, lng1, lat2, lng2)
 		if err != nil {
 			return nil, err
 		}
-		inArea, err := elemLocation.IsInArea(top, right, bottom, left)
 
-		if err != nil {
-			return nil, err
-		}
 		if inArea {
-			allEventsInArea = append(allEventsInArea, elem)
-		}
-		/*
-
-			lat, _ := strconv.ParseFloat(elem.Latitude, 64)
-			lng, _ := strconv.ParseFloat(elem.Longitude, 64)
-
-			if lat <= top && lat >= bottom && lng >= left && lng <= right {
-				allEventsInArea = append(allEventsInArea, elem)
+			eventsInLocation := []Event{}
+			GetDB().Model(&elem).Debug().Association("Events").Find(&eventsInLocation)
+			for _, event := range eventsInLocation {
+				GetDB().Debug().Preload("Location").Find(&event)
+				allEventsInArea = append(allEventsInArea, event)
 			}
-
-		*/
+		}
 	}
 
 	return &allEventsInArea, nil
