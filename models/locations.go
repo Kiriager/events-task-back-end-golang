@@ -54,7 +54,6 @@ func (locationData *RegisterLocation) ValidateNewLocation() (*Location, error) {
 }
 
 func GetLocation(locationId uint) (*Location, error) {
-
 	location := &Location{}
 	err := GetDB().Where("id = ?", locationId).First(location).Error
 	if err != nil {
@@ -95,4 +94,86 @@ func (location *Location) IsInArea(lat1, lng1, lat2, lng2 float64) (bool, error)
 		return true, nil
 	}
 	return false, nil
+}
+
+func FindAllLocations() (*[]Location, error) {
+	var allLocations []Location
+	result := GetDB().Find(&allLocations)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &allLocations, nil
+}
+
+func UpdateLocationRecord(updateLocationData *UpdateLocation, locationId *uint) (*Location, error) {
+
+	LocationToUpdate, err := GetLocation(*locationId)
+	if err != nil {
+		return nil, err
+	}
+
+	LocationToUpdate.UpdateLocationFields(updateLocationData)
+
+	err = LocationToUpdate.ValidateLocation()
+	if err != nil {
+		return nil, err
+	}
+
+	err = GetDB().Updates(LocationToUpdate).Where("id = ?", *locationId).Error
+	if err != nil {
+		return nil, err
+	}
+	//bug: lat = 0, lng = 0 must be possible
+
+	updatedLocationRecord, err := GetLocation(*locationId)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedLocationRecord, nil
+}
+
+func (locationToUpdate *Location) UpdateLocationFields(updateData *UpdateLocation) {
+
+	if updateData.Title != "" {
+		locationToUpdate.Title = updateData.Title
+	}
+	if updateData.Description != "" {
+		locationToUpdate.Description = updateData.Description
+	}
+
+	locationToUpdate.Latitude = updateData.Latitude
+	locationToUpdate.Longitude = updateData.Longitude
+
+}
+
+func (location *Location) ValidateLocation() error {
+
+	location.Title = strings.Join(strings.Fields(location.Title), " ")
+
+	if len(location.Title) < 2 || len(location.Title) > 40 {
+		return errors.New("title of location must be 4-20 chars! ")
+	}
+
+	location.Description = strings.Join(strings.Fields(location.Description), " ")
+
+	if len(location.Description) > 50 {
+		return errors.New("descrition must be less than 50 chars! ")
+	}
+
+	err := ValidateGeoCoords(location.Latitude, location.Longitude)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteLocation(locationId uint) error {
+	err := GetDB().Delete(&Location{}, locationId).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

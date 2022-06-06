@@ -139,8 +139,6 @@ func FindAllEvents() (*[]Event, error) {
 	var allEvents []Event
 	result := GetDB().Find(&allEvents)
 
-	//fmt.Println(result.RowsAffected)
-
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -209,7 +207,6 @@ func FindEventsInArea(latitude1, longitude1, latitude2, longitude2 string) (*[]E
 }
 
 func ValidateGeoCoords(lat, lng float64) error {
-
 	if lat < -90 || lat > 90 {
 		return errors.New("latitude is out of bounds")
 	}

@@ -89,3 +89,10 @@ type RegisterLocation struct {
 	Latitude    float64 `json:"latitude" binding:"required"`
 	Longitude   float64 `json:"longitude" binding:"required"`
 }
+
+type UpdateLocation struct {
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+}
