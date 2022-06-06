@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"test/models"
 
@@ -65,10 +64,6 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"event": updatedEvent, "success": true})
-}
-
-func (h *Handler) test(c *gin.Context) {
-	fmt.Println("Hello from test")
 }
 
 func (h *Handler) DeleteEvent(c *gin.Context) {
