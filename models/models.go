@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
 )
@@ -19,8 +21,16 @@ type User struct {
 	gorm.Model
 	Email    string `json:"email"`
 	Password string `json:"password,omitempty"`
+	Role     *Role  `json:"role"`
 	Token    string `json:"token,omitempty" sql:"-"`
 }
+
+type Role string
+
+const (
+	Regular Role = "regular"
+	Admin   Role = "admin"
+)
 
 type UserAuth struct {
 	gorm.Model
@@ -38,33 +48,51 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type CreateEvent struct {
-	Title       string `json:"title" binding:"required"`
-	Description string `json:"description"`
-	Start       string `json:"start" binding:"required"`
-	End         string `json:"end" binding:"required"`
-	Location    string `json:"location" binding:"required"`
-	Latitude    string `json:"latitude" binding:"required"`
-	Longitude   string `json:"longitude" binding:"required"`
+type RegisterEvent struct {
+	Title       string    `json:"title" binding:"required"`
+	Description string    `json:"description"`
+	Start       time.Time `json:"start" binding:"required"`
+	End         time.Time `json:"end" binding:"required"`
+	LocationId  uint      `json:"locationid" binding:"required"`
 }
 
 type Event struct {
 	gorm.Model
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Start       string `json:"start"`
-	End         string `json:"end"`
-	Location    string `json:"location"`
-	Latitude    string `json:"latitude"`
-	Longitude   string `json:"longitude"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Start       time.Time `json:"start"`
+	End         time.Time `json:"end"`
+	LocationId  uint      `json:"locationid"`
+	Location    Location  `gorm:"ForeignKey:LocationId"`
 }
 
 type UpdateEvent struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Start       string `json:"start"`
-	End         string `json:"end"`
-	Location    string `json:"location"`
-	Latitude    string `json:"latitude"`
-	Longitude   string `json:"longitude"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Start       time.Time `json:"start"`
+	End         time.Time `json:"end"`
+	LocationId  uint      `json:"locationid"`
+}
+
+type Location struct {
+	gorm.Model
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+	Events      []Event //`gorm:"ForeignKey:LocationId"`
+}
+
+type RegisterLocation struct {
+	Title       string  `json:"title" binding:"required"`
+	Description string  `json:"description"`
+	Latitude    float64 `json:"latitude" binding:"required"`
+	Longitude   float64 `json:"longitude" binding:"required"`
+}
+
+type UpdateLocation struct {
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
 }
