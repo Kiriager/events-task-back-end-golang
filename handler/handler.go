@@ -57,10 +57,5 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			location.DELETE("/:locationId", h.DeleteLocation)
 		}
 
-		test := api.Group("/test")
-		{
-			test.GET("/my-test", h.test)
-		}
-
 	}
 }
