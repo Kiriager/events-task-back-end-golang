@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"test/models"
 
@@ -26,6 +27,11 @@ func (h *Handler) AddEvent(c *gin.Context) {
 }
 
 func (h *Handler) ShowEvent(c *gin.Context) {
+
+	userId := c.GetUint("user")
+	user := models.GetUser(userId)
+	fmt.Println(user)
+
 	eventId, err := h.getPathParamUint(c, "eventId")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
