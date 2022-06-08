@@ -37,7 +37,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			main.GET("/me", h.MyAcc)
 			main.GET("/logout", h.Logout)
 
-			event := api.Group("/event")
+			event := main.Group("/event")
 			{
 				event.POST("/add", h.AddEvent)
 				event.GET("/:eventId/show", h.ShowEvent)
@@ -47,7 +47,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 				event.PUT("/:eventId", h.UpdateEvent)
 				event.DELETE("/:eventId", h.DeleteEvent)
 			}
-			location := api.Group("/location")
+			location := main.Group("/location")
 			{
 				location.POST("/add", h.AddLocation)
 				location.GET("/:locationId", h.ShowLocation)
