@@ -19,10 +19,11 @@ type Token struct {
 
 type User struct {
 	gorm.Model
-	Email    string `json:"email"`
-	Password string `json:"password,omitempty"`
-	Role     Role   `json:"role"` //Role *Role can't have address
-	Token    string `json:"token,omitempty" sql:"-"`
+	Email    string   `json:"email"`
+	Password string   `json:"password,omitempty"`
+	Role     Role     `json:"role"` //Role *Role can't have address
+	Token    string   `json:"token,omitempty" sql:"-"`
+	Events   []*Event `gorm:"many2many:user_events;"`
 }
 
 type Role string
@@ -65,15 +66,13 @@ type RegisterEvent struct {
 
 type Event struct {
 	gorm.Model
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	Start        time.Time `json:"start"`
-	End          time.Time `json:"end"`
-	LocationId   uint      `json:"locationid"`
-	Location     Location  `gorm:"ForeignKey:LocationId"`
-	CreatorId    uint      `json:"creatorid"`
-	Creator      User      `gorm:"ForeignKey:CreatorId"`
-	Participants []User    `json:"participants"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Start       time.Time `json:"start"`
+	End         time.Time `json:"end"`
+	LocationId  uint      `json:"locationid"`
+	Location    Location  `gorm:"ForeignKey:LocationId"`
+	Users       []*User   `gorm:"many2many:user_events;"`
 }
 
 type UpdateEvent struct {

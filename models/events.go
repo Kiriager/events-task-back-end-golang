@@ -14,8 +14,6 @@ func RecordNewEvent(newEventData *RegisterEvent, creatorId uint) (*Event, error)
 		return nil, err
 	}
 
-	newEvent.CreatorId = creatorId
-
 	err = GetDB().Create(newEvent).Error
 	if err != nil {
 		return nil, err
@@ -24,6 +22,7 @@ func RecordNewEvent(newEventData *RegisterEvent, creatorId uint) (*Event, error)
 	if newEvent.ID <= 0 {
 		return nil, errors.New("failed to create event connection error")
 	}
+
 	newEvent, err = GetEvent(newEvent.ID)
 	if err != nil {
 		return nil, err
@@ -78,11 +77,9 @@ func (eventToCheck *Event) ValidateEvent() error {
 func GetEvent(eventId uint) (*Event, error) {
 	event := &Event{}
 
-	err := GetDB().Where("id = ?", eventId).Preload("Location").First(event).Error
-	if err != nil {
-		return nil, err
-	}
-	err = GetDB().Where("id = ?", eventId).Preload("Creator").First(event).Error
+	//err := GetDB().Where("id = ?", eventId).Preload("Location").First(event).Error
+	err := GetDB().Where("id = ?", eventId).First(event).Error
+
 	if err != nil {
 		return nil, err
 	}
@@ -139,10 +136,16 @@ func UpdateEventRecord(updateEventData *UpdateEvent, eventId *uint) (*Event, err
 }
 
 func DeleteEvent(eventId uint) error {
-	err := GetDB().Delete(&Event{}, eventId).Error
+	_, err := GetEvent(eventId)
 	if err != nil {
 		return err
 	}
+
+	err = GetDB().Delete(&Event{}, eventId).Error
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -165,6 +168,7 @@ func FindAllEventsInLocation(locationId uint) ([]Event, error) {
 	// GetDB().Debug().Preload("Events").Find(&location)
 	// events = location.Events
 	GetDB().Model(&location).Debug().Association("Events").Find(&events)
+
 	return events, nil
 }
 

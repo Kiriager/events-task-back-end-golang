@@ -52,6 +52,14 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 		return
 	}
 
+	err = models.GetDB().Where("id = ?", eventId).Preload("Location").First(event).Error
+	err = models.GetDB().Where("id = ?", eventId).Preload("Users").First(event).Error
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"event": event, "success": true})
 }
 
@@ -85,6 +93,13 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
+	err = models.GetDB().Where("id = ?", eventId).Preload("Location").First(updatedEvent).Error
+	err = models.GetDB().Where("id = ?", eventId).Preload("Users").First(updatedEvent).Error
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"event": updatedEvent, "success": true})
 }
@@ -112,7 +127,7 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{"event id": *eventId, "success": true})
 }
 
 func (h *Handler) GetAllEvents(c *gin.Context) {

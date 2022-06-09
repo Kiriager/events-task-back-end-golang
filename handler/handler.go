@@ -37,28 +37,32 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			main.GET("/me", h.MyAcc)
 			main.GET("/logout", h.Logout)
 
-			user := main.Group("/user")
-			{
-				user.PUT("/:userId", h.UpdateUser)
-			}
+			//main.GET("/events", h.ShowUserEvents)
+
+			main.PUT("/reg-to-event/:eventId", h.RegisterToEvent)
+			/*
+				user := main.Group("/user")
+				{
+					user.PUT("/:userId", h.UpdateUser)
+				}*/
 
 			event := main.Group("/event")
-			{
-				event.POST("/add", h.AddEvent)
-				event.GET("/:eventId/show", h.ShowEvent)
-				event.GET("/all-events", h.GetAllEvents)
-				event.GET("/in-area", h.GetEventsInArea)
-				event.GET("/in-location/:locationId", h.GetEventsInLocation)
-				event.PUT("/:eventId", h.UpdateEvent)
-				event.DELETE("/:eventId", h.DeleteEvent)
+			{ //short info means without any preloads
+				event.POST("/add", h.AddEvent)                               //short info about event
+				event.GET("/:eventId/show", h.ShowEvent)                     //all info about event (users and location)
+				event.GET("/all-events", h.GetAllEvents)                     //short info about events
+				event.GET("/in-area", h.GetEventsInArea)                     //info about event without users data
+				event.GET("/in-location/:locationId", h.GetEventsInLocation) //short info about events in location
+				event.PUT("/:eventId", h.UpdateEvent)                        //info about event without users data
+				event.DELETE("/:eventId", h.DeleteEvent)                     //event id
 			}
 			location := main.Group("/location")
 			{
-				location.POST("/add", h.AddLocation)
-				location.GET("/:locationId", h.ShowLocation)
-				location.GET("/all", h.ShowAllLocations)
-				location.PUT("/:locationId", h.UpdateLocation)
-				location.DELETE("/:locationId", h.DeleteLocation)
+				location.POST("/add", h.AddLocation)              //info about location without location events
+				location.GET("/:locationId", h.ShowLocation)      //all info about location (with short events data)
+				location.GET("/all", h.ShowAllLocations)          //short info about locations without events data
+				location.PUT("/:locationId", h.UpdateLocation)    //all info about location (with short events data)
+				location.DELETE("/:locationId", h.DeleteLocation) //short info about locations without events data
 			}
 		}
 		public := api.Group("/public")

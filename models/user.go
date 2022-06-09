@@ -44,13 +44,14 @@ func UpdateUserRecord(updateUserData *UpdateUser, userId *uint) (*User, error) {
 	return userToUpdate, nil
 }
 
-func GetUser(u uint) *User {
+func GetUser(userId uint) *User {
 
 	acc := &User{}
-	GetDB().Where("id = ?", u).First(acc)
+	GetDB().Where("id = ?", userId).First(acc)
 	if acc.Email == "" { //User not found!
 		return nil
 	}
+	//GetDB().Where("id = ?", userId).Preload("Events").First(acc)
 
 	acc.Password = ""
 	return acc
