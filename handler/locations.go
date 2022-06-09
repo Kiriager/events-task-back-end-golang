@@ -42,8 +42,13 @@ func (h *Handler) ShowLocation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
-	//add if id == 0 or there is no id respond all events
+
 	location, err := models.GetLocation(*locationId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+	err = models.GetDB().Where("id = ?", locationId).Preload("Events").First(location).Error
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -92,6 +97,12 @@ func (h *Handler) UpdateLocation(c *gin.Context) {
 		return
 	}
 
+	err = models.GetDB().Where("id = ?", locationId).Preload("Events").First(updatedlocation).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"location": updatedlocation, "success": true})
 }
 
@@ -118,5 +129,5 @@ func (h *Handler) DeleteLocation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{"location id": *locationId, "success": true})
 }

@@ -29,9 +29,9 @@ type User struct {
 type Role string
 
 const (
-	Regular    Role = "regular"
-	Admin      Role = "admin"
-	SuperAdmin Role = "superadmin"
+	Regular    Role = "regular"    //able to edit own profile and manage own events
+	Admin      Role = "admin"      //able to create locations and events
+	SuperAdmin Role = "superadmin" //admin + able to manage users profiles
 )
 
 type UserAuth struct {

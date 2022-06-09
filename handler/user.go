@@ -72,3 +72,48 @@ func (h *Handler) RegisterToEvent(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"user's events": authorizedUser.Events, "success": true})
 }
+
+func (h *Handler) ShowUserEvents(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser := models.GetUser(authorizedUserId)
+
+	err := models.GetDB().Where("id = ?", authorizedUserId).Preload("Events").First(authorizedUser).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user's events": authorizedUser.Events, "success": true})
+}
+
+func (h *Handler) LeaveEvent(c *gin.Context) {
+	eventId, err := h.getPathParamUint(c, "eventId")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	event, err := models.GetEvent(*eventId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	authorizedUserId := c.GetUint("user")
+	authorizedUser := models.GetUser(authorizedUserId)
+
+	err = models.GetDB().Model(&authorizedUser).Association("Events").Delete(event)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	authorizedUser = models.GetUser(authorizedUserId)
+	err = models.GetDB().Where("id = ?", authorizedUserId).Preload("Events").First(authorizedUser).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user's events": authorizedUser.Events, "success": true})
+}
