@@ -13,14 +13,14 @@ import (
 
 //Validate incoming user details...
 
-func (account *User) Validate() (bool, string) {
+func (account *User) Validate() error {
 
 	if !strings.Contains(account.Email, "@") {
-		return false, "Email address is required"
+		return errors.New("email address is required")
 	}
 
 	if len(account.Password) < 6 {
-		return false, "Password is required"
+		return errors.New("password is required")
 	}
 
 	//Email must be unique
@@ -29,13 +29,13 @@ func (account *User) Validate() (bool, string) {
 	//check for errors and duplicate emails
 	err := GetDB().Where("email = ?", account.Email).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return false, "Connection error. Please retry"
+		return errors.New("connection error. please retry")
 	}
 	if temp.Email != "" && temp.ID != account.ID {
-		return false, "Email address already in use by another user."
+		return errors.New("email address already in use by another user")
 	}
 
-	return true, "Requirement passed"
+	return nil
 }
 
 func CreateToken(authD *UserAuth) (string, error) {
@@ -81,32 +81,6 @@ func CreateAuth(userId uint) (*UserAuth, error) {
 	return au, nil
 }
 
-func Create(request *CreateUser) (*User, error) {
-
-	user := &User{Email: request.Email, Password: request.Password}
-
-	if ok, resp := user.Validate(); !ok {
-		return nil, errors.New(resp)
-	}
-
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	user.Password = string(hashedPassword)
-
-	GetDB().Create(user)
-
-	if user.ID <= 0 {
-		return nil, errors.New("failed to create user, connection error")
-	}
-
-	//Create new JWT token for the newly registered user
-
-	user.Token = GenerateToken(user.ID)
-
-	user.Password = "" //delete password
-
-	return user, nil
-}
-
 func Login(request *LoginRequest) (*User, error) {
 
 	db := GetDB()
@@ -147,16 +121,4 @@ func Logout(user uint, auth string) error {
 		return errors.New("auth not found")
 	}
 	return nil
-}
-
-func GetUser(u uint) *User {
-
-	acc := &User{}
-	GetDB().Where("id = ?", u).First(acc)
-	if acc.Email == "" { //User not found!
-		return nil
-	}
-
-	acc.Password = ""
-	return acc
 }

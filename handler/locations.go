@@ -8,6 +8,14 @@ import (
 )
 
 func (h *Handler) AddLocation(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser := models.GetUser(authorizedUserId)
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
+
 	locationData := models.RegisterLocation{}
 	err := c.ShouldBindJSON(&locationData)
 

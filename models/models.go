@@ -21,15 +21,16 @@ type User struct {
 	gorm.Model
 	Email    string `json:"email"`
 	Password string `json:"password,omitempty"`
-	Role     *Role  `json:"role"`
+	Role     Role   `json:"role"` //Role *Role can't have address
 	Token    string `json:"token,omitempty" sql:"-"`
 }
 
 type Role string
 
 const (
-	Regular Role = "regular"
-	Admin   Role = "admin"
+	Regular    Role = "regular"
+	Admin      Role = "admin"
+	SuperAdmin Role = "superadmin"
 )
 
 type UserAuth struct {
@@ -38,9 +39,15 @@ type UserAuth struct {
 	AuthUUID string `gorm:"size:255;not null;" json:"auth_uuid"`
 }
 
-type CreateUser struct {
+type RegisterUser struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
+}
+
+type UpdateUser struct {
+	//Email    string `json:"email"`
+	//Password string `json:"password"`
+	Role Role `json:"role"`
 }
 
 type LoginRequest struct {

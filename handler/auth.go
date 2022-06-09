@@ -9,13 +9,13 @@ import (
 )
 
 func (h *Handler) SignUp(c *gin.Context) {
-	userCreate := models.CreateUser{}
-	if err := c.ShouldBindJSON(&userCreate); err != nil {
+	registerUser := models.RegisterUser{}
+	if err := c.ShouldBindJSON(&registerUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
 
-	user, err := models.Create(&userCreate)
+	user, err := models.CreateUser(&registerUser)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
