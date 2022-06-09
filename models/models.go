@@ -65,12 +65,15 @@ type RegisterEvent struct {
 
 type Event struct {
 	gorm.Model
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Start       time.Time `json:"start"`
-	End         time.Time `json:"end"`
-	LocationId  uint      `json:"locationid"`
-	Location    Location  `gorm:"ForeignKey:LocationId"`
+	Title        string    `json:"title"`
+	Description  string    `json:"description"`
+	Start        time.Time `json:"start"`
+	End          time.Time `json:"end"`
+	LocationId   uint      `json:"locationid"`
+	Location     Location  `gorm:"ForeignKey:LocationId"`
+	CreatorId    uint      `json:"creatorid"`
+	Creator      User      `gorm:"ForeignKey:CreatorId"`
+	Participants []User    `json:"participants"`
 }
 
 type UpdateEvent struct {

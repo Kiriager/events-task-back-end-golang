@@ -12,7 +12,8 @@ func (h *Handler) AddLocation(c *gin.Context) {
 	authorizedUser := models.GetUser(authorizedUserId)
 
 	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "current user does't have rights to perform action", "success": false})
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
 		return
 	}
 
@@ -61,6 +62,15 @@ func (h *Handler) ShowAllLocations(c *gin.Context) {
 }
 
 func (h *Handler) UpdateLocation(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser := models.GetUser(authorizedUserId)
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
+
 	locationUpdateData := models.UpdateLocation{}
 
 	err := c.ShouldBindJSON(&locationUpdateData)
@@ -86,6 +96,14 @@ func (h *Handler) UpdateLocation(c *gin.Context) {
 }
 
 func (h *Handler) DeleteLocation(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser := models.GetUser(authorizedUserId)
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
 
 	locationId, err := h.getPathParamUint(c, "locationId")
 	if err != nil {

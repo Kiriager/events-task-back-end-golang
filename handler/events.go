@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"test/models"
 
@@ -9,6 +8,15 @@ import (
 )
 
 func (h *Handler) AddEvent(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser := models.GetUser(authorizedUserId)
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
+
 	eventRegisterRequest := models.RegisterEvent{}
 
 	err := c.ShouldBindJSON(&eventRegisterRequest)
@@ -17,7 +25,7 @@ func (h *Handler) AddEvent(c *gin.Context) {
 		return
 	}
 
-	newEvent, err := models.RecordNewEvent(&eventRegisterRequest)
+	newEvent, err := models.RecordNewEvent(&eventRegisterRequest, authorizedUserId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -28,9 +36,9 @@ func (h *Handler) AddEvent(c *gin.Context) {
 
 func (h *Handler) ShowEvent(c *gin.Context) {
 
-	userId := c.GetUint("user")
-	user := models.GetUser(userId)
-	fmt.Println(user)
+	//userId := c.GetUint("user")
+	//user := models.GetUser(userId)
+	//fmt.Println(user)
 
 	eventId, err := h.getPathParamUint(c, "eventId")
 	if err != nil {
@@ -48,6 +56,15 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 }
 
 func (h *Handler) UpdateEvent(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser := models.GetUser(authorizedUserId)
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
+
 	eventUpdateData := models.UpdateEvent{}
 
 	err := c.ShouldBindJSON(&eventUpdateData)
@@ -73,6 +90,14 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 }
 
 func (h *Handler) DeleteEvent(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser := models.GetUser(authorizedUserId)
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
 
 	eventId, err := h.getPathParamUint(c, "eventId")
 	if err != nil {

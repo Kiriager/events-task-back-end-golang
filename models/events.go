@@ -6,13 +6,15 @@ import (
 	"strings"
 )
 
-func RecordNewEvent(newEventData *RegisterEvent) (*Event, error) {
+func RecordNewEvent(newEventData *RegisterEvent, creatorId uint) (*Event, error) {
 	newEvent := newEventData.constructEvent()
 
 	err := newEvent.ValidateEvent()
 	if err != nil {
 		return nil, err
 	}
+
+	newEvent.CreatorId = creatorId
 
 	err = GetDB().Create(newEvent).Error
 	if err != nil {
@@ -21,6 +23,10 @@ func RecordNewEvent(newEventData *RegisterEvent) (*Event, error) {
 
 	if newEvent.ID <= 0 {
 		return nil, errors.New("failed to create event connection error")
+	}
+	newEvent, err = GetEvent(newEvent.ID)
+	if err != nil {
+		return nil, err
 	}
 
 	return newEvent, nil
@@ -35,6 +41,7 @@ func (eventData *RegisterEvent) constructEvent() *Event {
 		Start:       eventData.Start,
 		End:         eventData.End,
 		LocationId:  eventData.LocationId,
+
 		//Location:    *location,
 	}
 
@@ -72,6 +79,10 @@ func GetEvent(eventId uint) (*Event, error) {
 	event := &Event{}
 
 	err := GetDB().Where("id = ?", eventId).Preload("Location").First(event).Error
+	if err != nil {
+		return nil, err
+	}
+	err = GetDB().Where("id = ?", eventId).Preload("Creator").First(event).Error
 	if err != nil {
 		return nil, err
 	}

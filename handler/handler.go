@@ -61,5 +61,21 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 				location.DELETE("/:locationId", h.DeleteLocation)
 			}
 		}
+		public := api.Group("/public")
+		{
+			event := public.Group("/event")
+			{
+				event.GET("/:eventId/show", h.ShowEvent)
+				event.GET("/all-events", h.GetAllEvents)
+				event.GET("/in-area", h.GetEventsInArea)
+				event.GET("/in-location/:locationId", h.GetEventsInLocation)
+			}
+
+			location := public.Group("/location")
+			{
+				location.GET("/:locationId", h.ShowLocation)
+				location.GET("/all", h.ShowAllLocations)
+			}
+		}
 	}
 }
