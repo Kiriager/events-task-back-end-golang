@@ -9,7 +9,11 @@ import (
 
 func (h *Handler) AddLocation(c *gin.Context) {
 	authorizedUserId := c.GetUint("user")
-	authorizedUser := models.GetUser(authorizedUserId)
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
 
 	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
 		c.JSON(http.StatusBadRequest,
@@ -18,7 +22,7 @@ func (h *Handler) AddLocation(c *gin.Context) {
 	}
 
 	locationData := models.RegisterLocation{}
-	err := c.ShouldBindJSON(&locationData)
+	err = c.ShouldBindJSON(&locationData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
@@ -68,7 +72,11 @@ func (h *Handler) ShowAllLocations(c *gin.Context) {
 
 func (h *Handler) UpdateLocation(c *gin.Context) {
 	authorizedUserId := c.GetUint("user")
-	authorizedUser := models.GetUser(authorizedUserId)
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
 
 	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
 		c.JSON(http.StatusBadRequest,
@@ -78,7 +86,7 @@ func (h *Handler) UpdateLocation(c *gin.Context) {
 
 	locationUpdateData := models.UpdateLocation{}
 
-	err := c.ShouldBindJSON(&locationUpdateData)
+	err = c.ShouldBindJSON(&locationUpdateData)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -108,7 +116,11 @@ func (h *Handler) UpdateLocation(c *gin.Context) {
 
 func (h *Handler) DeleteLocation(c *gin.Context) {
 	authorizedUserId := c.GetUint("user")
-	authorizedUser := models.GetUser(authorizedUserId)
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
 
 	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
 		c.JSON(http.StatusBadRequest,

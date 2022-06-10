@@ -48,7 +48,12 @@ type RegisterUser struct {
 type UpdateUser struct {
 	//Email    string `json:"email"`
 	Password string `json:"password"`
-	Role     Role   `json:"role"`
+	Role     string `json:"role"`
+}
+
+type UpdateMyAcc struct {
+	//Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type LoginRequest struct {
@@ -107,7 +112,6 @@ type UpdateLocation struct {
 }
 
 type RegUserToEvent struct {
-	UserId  uint `json:"userId" binding:"required"`
-	Status  bool `json:"status" binding:"required"`
-	EventId uint `json:"eventId" binding:"required"`
+	Status  string `json:"status" binding:"required"`
+	EventId uint   `json:"eventId" binding:"required"`
 }

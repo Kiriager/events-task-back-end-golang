@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"test/models"
 
@@ -20,7 +19,7 @@ func (h *Handler) SignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
-
+	user.Password = ""
 	c.JSON(http.StatusOK, gin.H{"user": user, "success": true})
 }
 
@@ -36,7 +35,7 @@ func (h *Handler) SignIn(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
-
+	user.Password = ""
 	c.JSON(http.StatusOK, gin.H{"user": user, "success": true})
 }
 
@@ -54,8 +53,11 @@ func (h *Handler) Logout(c *gin.Context) {
 
 func (h *Handler) MyAcc(c *gin.Context) {
 	userId := c.GetUint("user")
-	user := models.GetUser(userId)
-	fmt.Println(userId)
-	fmt.Println(user)
+	user, err := models.GetUser(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+	user.Password = ""
 	c.JSON(http.StatusOK, gin.H{"user": user, "success": true})
 }

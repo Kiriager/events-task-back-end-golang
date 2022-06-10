@@ -9,8 +9,11 @@ import (
 
 func (h *Handler) AddEvent(c *gin.Context) {
 	authorizedUserId := c.GetUint("user")
-	authorizedUser := models.GetUser(authorizedUserId)
-
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
 	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
 		c.JSON(http.StatusBadRequest,
 			gin.H{"error": "current user does't have rights to perform action", "success": false})
@@ -19,7 +22,7 @@ func (h *Handler) AddEvent(c *gin.Context) {
 
 	eventRegisterRequest := models.RegisterEvent{}
 
-	err := c.ShouldBindJSON(&eventRegisterRequest)
+	err = c.ShouldBindJSON(&eventRegisterRequest)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -53,7 +56,7 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 	}
 
 	err = models.GetDB().Where("id = ?", eventId).Preload("Location").First(event).Error
-	
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -71,7 +74,11 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 
 func (h *Handler) UpdateEvent(c *gin.Context) {
 	authorizedUserId := c.GetUint("user")
-	authorizedUser := models.GetUser(authorizedUserId)
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
 
 	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
 		c.JSON(http.StatusBadRequest,
@@ -81,7 +88,7 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 
 	eventUpdateData := models.UpdateEvent{}
 
-	err := c.ShouldBindJSON(&eventUpdateData)
+	err = c.ShouldBindJSON(&eventUpdateData)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -116,7 +123,11 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 
 func (h *Handler) DeleteEvent(c *gin.Context) {
 	authorizedUserId := c.GetUint("user")
-	authorizedUser := models.GetUser(authorizedUserId)
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
 
 	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
 		c.JSON(http.StatusBadRequest,
