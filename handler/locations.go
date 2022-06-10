@@ -8,8 +8,21 @@ import (
 )
 
 func (h *Handler) AddLocation(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
+
 	locationData := models.RegisterLocation{}
-	err := c.ShouldBindJSON(&locationData)
+	err = c.ShouldBindJSON(&locationData)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
@@ -33,8 +46,13 @@ func (h *Handler) ShowLocation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
-	//add if id == 0 or there is no id respond all events
+
 	location, err := models.GetLocation(*locationId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+	err = models.GetDB().Where("id = ?", locationId).Preload("Events").First(location).Error
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -53,9 +71,22 @@ func (h *Handler) ShowAllLocations(c *gin.Context) {
 }
 
 func (h *Handler) UpdateLocation(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
+
 	locationUpdateData := models.UpdateLocation{}
 
-	err := c.ShouldBindJSON(&locationUpdateData)
+	err = c.ShouldBindJSON(&locationUpdateData)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -74,10 +105,28 @@ func (h *Handler) UpdateLocation(c *gin.Context) {
 		return
 	}
 
+	err = models.GetDB().Where("id = ?", locationId).Preload("Events").First(updatedlocation).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"location": updatedlocation, "success": true})
 }
 
 func (h *Handler) DeleteLocation(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
 
 	locationId, err := h.getPathParamUint(c, "locationId")
 	if err != nil {
@@ -92,5 +141,5 @@ func (h *Handler) DeleteLocation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{"location id": *locationId, "success": true})
 }

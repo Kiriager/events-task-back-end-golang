@@ -8,15 +8,27 @@ import (
 )
 
 func (h *Handler) AddEvent(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
+
 	eventRegisterRequest := models.RegisterEvent{}
 
-	err := c.ShouldBindJSON(&eventRegisterRequest)
+	err = c.ShouldBindJSON(&eventRegisterRequest)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
 
-	newEvent, err := models.RecordNewEvent(&eventRegisterRequest)
+	newEvent, err := models.RecordNewEvent(&eventRegisterRequest, authorizedUserId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -26,6 +38,11 @@ func (h *Handler) AddEvent(c *gin.Context) {
 }
 
 func (h *Handler) ShowEvent(c *gin.Context) {
+
+	//userId := c.GetUint("user")
+	//user := models.GetUser(userId)
+	//fmt.Println(user)
+
 	eventId, err := h.getPathParamUint(c, "eventId")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
@@ -38,13 +55,40 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 		return
 	}
 
+	err = models.GetDB().Where("id = ?", eventId).Preload("Location").First(event).Error
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	err = models.GetDB().Where("id = ?", eventId).Preload("Users").First(event).Error
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"event": event, "success": true})
 }
 
 func (h *Handler) UpdateEvent(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
+
 	eventUpdateData := models.UpdateEvent{}
 
-	err := c.ShouldBindJSON(&eventUpdateData)
+	err = c.ShouldBindJSON(&eventUpdateData)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -57,7 +101,18 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 	}
 
 	updatedEvent, err := models.UpdateEventRecord(&eventUpdateData, eventId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
 
+	err = models.GetDB().Where("id = ?", eventId).Preload("Location").First(updatedEvent).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	err = models.GetDB().Where("id = ?", eventId).Preload("Users").First(updatedEvent).Error
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
@@ -67,6 +122,18 @@ func (h *Handler) UpdateEvent(c *gin.Context) {
 }
 
 func (h *Handler) DeleteEvent(c *gin.Context) {
+	authorizedUserId := c.GetUint("user")
+	authorizedUser, err := models.GetUser(authorizedUserId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
+	if authorizedUser.Role != models.Admin && authorizedUser.Role != models.SuperAdmin {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": "current user does't have rights to perform action", "success": false})
+		return
+	}
 
 	eventId, err := h.getPathParamUint(c, "eventId")
 	if err != nil {
@@ -75,13 +142,12 @@ func (h *Handler) DeleteEvent(c *gin.Context) {
 	}
 
 	err = models.DeleteEvent(*eventId)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{"event id": *eventId, "success": true})
 }
 
 func (h *Handler) GetAllEvents(c *gin.Context) {

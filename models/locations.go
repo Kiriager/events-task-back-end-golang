@@ -171,7 +171,12 @@ func (location *Location) ValidateLocation() error {
 }
 
 func DeleteLocation(locationId uint) error {
-	err := GetDB().Delete(&Location{}, locationId).Error
+	_, err := GetLocation(locationId)
+	if err != nil {
+		return err
+	}
+
+	err = GetDB().Delete(&Location{}, locationId).Error
 	if err != nil {
 		return err
 	}

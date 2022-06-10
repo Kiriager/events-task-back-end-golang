@@ -19,17 +19,19 @@ type Token struct {
 
 type User struct {
 	gorm.Model
-	Email    string `json:"email"`
-	Password string `json:"password,omitempty"`
-	Role     *Role  `json:"role"`
-	Token    string `json:"token,omitempty" sql:"-"`
+	Email    string   `json:"email"`
+	Password string   `json:"password,omitempty"`
+	Role     Role     `json:"role"` //Role *Role can't have address
+	Token    string   `json:"token,omitempty" sql:"-"`
+	Events   []*Event `gorm:"many2many:user_events;"`
 }
 
 type Role string
 
 const (
-	Regular Role = "regular"
-	Admin   Role = "admin"
+	Regular    Role = "regular"    //able to edit own profile and manage own events
+	Admin      Role = "admin"      //able to create locations and events
+	SuperAdmin Role = "superadmin" //admin + able to manage users profiles
 )
 
 type UserAuth struct {
@@ -38,9 +40,20 @@ type UserAuth struct {
 	AuthUUID string `gorm:"size:255;not null;" json:"auth_uuid"`
 }
 
-type CreateUser struct {
+type RegisterUser struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
+}
+
+type UpdateUser struct {
+	//Email    string `json:"email"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
+}
+
+type UpdateMyAcc struct {
+	//Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type LoginRequest struct {
@@ -64,6 +77,7 @@ type Event struct {
 	End         time.Time `json:"end"`
 	LocationId  uint      `json:"locationid"`
 	Location    Location  `gorm:"ForeignKey:LocationId"`
+	Users       []*User   `gorm:"many2many:user_events;"`
 }
 
 type UpdateEvent struct {
@@ -80,7 +94,7 @@ type Location struct {
 	Description string  `json:"description"`
 	Latitude    float64 `json:"latitude"`
 	Longitude   float64 `json:"longitude"`
-	Events      []Event //`gorm:"ForeignKey:LocationId"`
+	Events      []Event
 }
 
 type RegisterLocation struct {
@@ -95,4 +109,9 @@ type UpdateLocation struct {
 	Description string  `json:"description"`
 	Latitude    float64 `json:"latitude"`
 	Longitude   float64 `json:"longitude"`
+}
+
+type RegUserToEvent struct {
+	Status  string `json:"status" binding:"required"`
+	EventId uint   `json:"eventId" binding:"required"`
 }
