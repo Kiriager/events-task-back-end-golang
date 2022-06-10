@@ -30,21 +30,22 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 			auth.POST("/sign-in", h.SignIn)
 		}
 
-		main := api.Group("/")
+		main := api.Group("/") //for authorized users
 		{
 			main.Use(JwtAuthentication())
 
-			main.GET("/me", h.MyAcc)
-			main.GET("/logout", h.Logout)
+			main.GET("/me", h.MyAcc)      //from own acc
+			main.GET("/logout", h.Logout) //from own acc
 
-			main.GET("/events", h.ShowUserEvents)                 //short info about user events
-			main.PUT("/reg-to-event/:eventId", h.RegisterToEvent) //updated short info about user events
-			main.PUT("/leave-event/:eventId", h.LeaveEvent)       //updated short info about user events
+			main.GET("/events", h.ShowUserEvents)             //short info about user events
+			main.PUT("/manage-user-event", h.manageUserEvent) //updated short info about user events //from own acc or from super admin
+			//main.PUT("/leave-event/:eventId", h.LeaveEvent)       //updated short info about user events //from own acc or from super admin
 
 			user := main.Group("/user")
 			{
-				user.PUT("/:userId", h.UpdateUser)
-				//user.DELETE("/:eventId", h.DeleteUser)
+				//user.GET("/:userId", h.ShowUser)
+				user.PUT("/:userId", h.UpdateUser)    //updated user short info //from own accaunt or from super admin
+				user.DELETE("/:userId", h.DeleteUser) //deleted user email/id //only from super admin
 			}
 
 			event := main.Group("/event") //short info means without any preloads
@@ -57,6 +58,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 				event.PUT("/:eventId", h.UpdateEvent)                        //info about event without users data //admin only
 				event.DELETE("/:eventId", h.DeleteEvent)                     //deleted event id //admin only
 			}
+
 			location := main.Group("/location")
 			{
 				location.POST("/add", h.AddLocation)              //short info about location //admin only

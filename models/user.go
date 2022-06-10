@@ -6,42 +6,28 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func UpdateUserRecord(updateUserData *UpdateUser, userId *uint) (*User, error) {
-	//authorizedUserID = 2
-
+func UpdateUserRecord(updateUserData *UpdateUser, userId *uint, fromAdmin bool) error {
 	userToUpdate := GetUser(*userId)
+	if updateUserData.Password != "" {
+		userToUpdate.Password = updateUserData.Password
+	}
+	if fromAdmin {
+		userToUpdate.Role = updateUserData.Role
+	}
 
-	userToUpdate.Role = updateUserData.Role
 	err := userToUpdate.Validate()
 	if err != nil {
-		return nil, err
+		return err
 	}
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(userToUpdate.Password), bcrypt.DefaultCost)
+	userToUpdate.Password = string(hashedPassword)
 
 	err = GetDB().Updates(userToUpdate).Where("id = ?", *userId).Error
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	/*
-		userToUpdate.UpdateUserFields(updateuserData)
-
-		err = userToUpdate.Validate()
-		if err != nil {
-			return nil, err
-		}
-
-		err = GetDB().Updates(userToUpdate).Where("id = ?", *userId).Error
-		if err != nil {
-			return nil, err
-		}
-
-		updatedUserRecord, err := GetUser(*userId)
-		if err != nil {
-			return nil, err
-		}
-	*/
-	//return updatedUserRecord, nil
-	return userToUpdate, nil
+	return nil
 }
 
 func GetUser(userId uint) *User {
@@ -51,16 +37,14 @@ func GetUser(userId uint) *User {
 	if acc.Email == "" { //User not found!
 		return nil
 	}
-	//GetDB().Where("id = ?", userId).Preload("Events").First(acc)
 
 	acc.Password = ""
 	return acc
 }
 
 func CreateUser(request *RegisterUser) (*User, error) {
-	role := Regular
-	user := &User{Email: request.Email, Password: request.Password, Role: Role("regular")}
-	user.Role = role //
+	user := &User{Email: request.Email, Password: request.Password, Role: Regular}
+
 	err := user.Validate()
 
 	if err != nil {

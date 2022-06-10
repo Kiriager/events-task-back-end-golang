@@ -47,8 +47,8 @@ type RegisterUser struct {
 
 type UpdateUser struct {
 	//Email    string `json:"email"`
-	//Password string `json:"password"`
-	Role Role `json:"role"`
+	Password string `json:"password"`
+	Role     Role   `json:"role"`
 }
 
 type LoginRequest struct {
@@ -89,7 +89,7 @@ type Location struct {
 	Description string  `json:"description"`
 	Latitude    float64 `json:"latitude"`
 	Longitude   float64 `json:"longitude"`
-	Events      []Event //`gorm:"ForeignKey:LocationId"`
+	Events      []Event
 }
 
 type RegisterLocation struct {
@@ -104,4 +104,10 @@ type UpdateLocation struct {
 	Description string  `json:"description"`
 	Latitude    float64 `json:"latitude"`
 	Longitude   float64 `json:"longitude"`
+}
+
+type RegUserToEvent struct {
+	UserId  uint `json:"userId" binding:"required"`
+	Status  bool `json:"status" binding:"required"`
+	EventId uint `json:"eventId" binding:"required"`
 }

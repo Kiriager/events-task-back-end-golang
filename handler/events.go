@@ -53,6 +53,12 @@ func (h *Handler) ShowEvent(c *gin.Context) {
 	}
 
 	err = models.GetDB().Where("id = ?", eventId).Preload("Location").First(event).Error
+	
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "success": false})
+		return
+	}
+
 	err = models.GetDB().Where("id = ?", eventId).Preload("Users").First(event).Error
 
 	if err != nil {
