@@ -31,7 +31,7 @@ func init() {
 	}
 
 	db = conn
-	//db.DropTableIfExists(&Contact{}, &Customer{})
+
 	err = db.Debug().AutoMigrate(
 		&User{},
 		&UserAuth{},
@@ -39,19 +39,9 @@ func init() {
 		&Event{},
 	) //Database migration
 
-	//db.Model(&Location{}).Association("Events")
-
-	//db.Model(&Event{}).AddForeignKey("cust_id", "customers(cust_id)", "CASCADE", "CASCADE")
-	//db.Model(&Event{}).AddForeignKey("cust_id", "customers(customer_id)", "CASCADE", "CASCADE") // Foreign key need to define manually
-
 	if err != nil {
 		return
 	}
-	//err = GetDB().Model(&Location{}).Association("Events").Error
-	/*if err != nil {
-		fmt.Println("__________________________________")
-		fmt.Println(err)
-	}*/
 	//InitialDbSample()
 }
 
@@ -110,6 +100,23 @@ func InitialDbSample() {
 		End:         time.Time{},
 		LocationId:  3,
 	}
+	users := &[3]User{}
+	users[0] = User{
+		Email:    "superadmin@example.com",
+		Password: "123456",
+		Role:     SuperAdmin,
+	}
+	users[1] = User{
+		Email:    "admin@example.com",
+		Password: "123456",
+		Role:     Admin,
+	}
+	users[2] = User{
+		Email:    "user@example.com",
+		Password: "123456",
+		Role:     Regular,
+	}
+
 	for i := 0; i < len(locations); i++ {
 		err := GetDB().Create(&locations[i]).Error
 		if err != nil {
@@ -118,6 +125,12 @@ func InitialDbSample() {
 	}
 	for i := 0; i < len(events); i++ {
 		err := GetDB().Create(&events[i]).Error
+		if err != nil {
+			return
+		}
+	}
+	for i := 0; i < len(users); i++ {
+		err := GetDB().Create(&users[i]).Error
 		if err != nil {
 			return
 		}
